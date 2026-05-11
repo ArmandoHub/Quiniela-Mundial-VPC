@@ -26,7 +26,7 @@ export default async function PartidosPage() {
   const predictionMap = (predictions ?? []).reduce((acc, p) => {
     acc[p.match_id] = p
     return acc
-  }, {} as Record<string, typeof predictions[0]>)
+  }, {} as Record<string, NonNullable<typeof predictions>[0]>) // TODO => Se cambio debido a errores en el deploy 10/05/2026 21:08
 
   const handleLogout = async () => {
     'use server'

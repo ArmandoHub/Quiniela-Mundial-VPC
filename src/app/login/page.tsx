@@ -22,7 +22,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="text-5xl mb-2">🏆</div>
+          <div className="text-5xl mb-2">⚽</div>
           <CardTitle className="text-2xl">Quiniela Mundial 2026</CardTitle>
           <CardDescription>
             {tab === 'login'

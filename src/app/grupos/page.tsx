@@ -15,8 +15,8 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface Partido {
-  fecha: string      // "11/06"
-  hora: string       // "13:00" hora Guatemala (= hora México)
+  fecha: string
+  hora: string
   local: string
   visitante: string
   estadio: string
@@ -28,7 +28,81 @@ interface Grupo {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DATOS  (hora Guatemala = hora México de los datos originales)
+// BANDERAS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const FLAGS: Record<string, string> = {
+  'México': 'mx',
+  'Sudáfrica': 'za',
+  'Corea del Sur': 'kr',
+  'Chequia': 'cz',
+  'Canadá': 'ca',
+  'Bosnia-Herzegovina': 'ba',
+  'Qatar': 'qa',
+  'Suiza': 'ch',
+  'Brasil': 'br',
+  'Marruecos': 'ma',
+  'Haití': 'ht',
+  'Escocia': 'gb-sct',
+  'EE.UU.': 'us',
+  'Paraguay': 'py',
+  'Australia': 'au',
+  'Turquía': 'tr',
+  'Alemania': 'de',
+  'Curazao': 'cw',
+  'Costa de Marfil': 'ci',
+  'Ecuador': 'ec',
+  'Países Bajos': 'nl',
+  'Japón': 'jp',
+  'Suecia': 'se',
+  'Túnez': 'tn',
+  'Bélgica': 'be',
+  'Egipto': 'eg',
+  'Irán': 'ir',
+  'Nueva Zelanda': 'nz',
+  'España': 'es',
+  'Cabo Verde': 'cv',
+  'Arabia Saudita': 'sa',
+  'Uruguay': 'uy',
+  'Francia': 'fr',
+  'Senegal': 'sn',
+  'Irak': 'iq',
+  'Noruega': 'no',
+  'Argentina': 'ar',
+  'Argelia': 'dz',
+  'Austria': 'at',
+  'Jordania': 'jo',
+  'Portugal': 'pt',
+  'RD Congo': 'cd',
+  'Uzbekistán': 'uz',
+  'Colombia': 'co',
+  'Inglaterra': 'gb-eng',
+  'Croacia': 'hr',
+  'Ghana': 'gh',
+  'Panamá': 'pa',
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENTE BANDERA
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TeamFlag({ country }: { country: string }) {
+  const code = FLAGS[country]
+
+  if (!code) return null
+
+  return (
+    <img
+      src={`https://flagcdn.com/${code}.svg`}
+      alt={`Bandera de ${country}`}
+      className="h-4 w-6 object-cover rounded-[2px] border border-slate-200 shadow-sm"
+      loading="lazy"
+    />
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATOS
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GRUPOS: Grupo[] = [
@@ -43,6 +117,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '25/06', hora: '19:00', local: 'Sudáfrica', visitante: 'Corea del Sur', estadio: 'Estadio Monterrey' },
     ],
   },
+
   {
     nombre: 'B',
     partidos: [
@@ -54,6 +129,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '24/06', hora: '13:00', local: 'Suiza', visitante: 'Canadá', estadio: 'Estadio Vancouver' },
     ],
   },
+
   {
     nombre: 'C',
     partidos: [
@@ -65,6 +141,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '24/06', hora: '16:00', local: 'Escocia', visitante: 'Brasil', estadio: 'Estadio Miami' },
     ],
   },
+
   {
     nombre: 'D',
     partidos: [
@@ -76,6 +153,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '26/06', hora: '20:00', local: 'Turquía', visitante: 'EE.UU.', estadio: 'Estadio Los Ángeles' },
     ],
   },
+
   {
     nombre: 'E',
     partidos: [
@@ -87,6 +165,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '25/06', hora: '14:00', local: 'Ecuador', visitante: 'Alemania', estadio: 'Estadio Nueva York/NJ' },
     ],
   },
+
   {
     nombre: 'F',
     partidos: [
@@ -98,6 +177,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '26/06', hora: '17:00', local: 'Túnez', visitante: 'Países Bajos', estadio: 'Estadio Kansas City' },
     ],
   },
+
   {
     nombre: 'G',
     partidos: [
@@ -109,6 +189,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '27/06', hora: '21:00', local: 'Nueva Zelanda', visitante: 'Bélgica', estadio: 'Estadio Vancouver' },
     ],
   },
+
   {
     nombre: 'H',
     partidos: [
@@ -120,6 +201,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '27/06', hora: '18:00', local: 'Uruguay', visitante: 'España', estadio: 'Estadio Guadalajara' },
     ],
   },
+
   {
     nombre: 'I',
     partidos: [
@@ -131,6 +213,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '26/06', hora: '13:00', local: 'Senegal', visitante: 'Irak', estadio: 'Estadio Toronto' },
     ],
   },
+
   {
     nombre: 'J',
     partidos: [
@@ -142,6 +225,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '28/06', hora: '20:00', local: 'Jordania', visitante: 'Argentina', estadio: 'Estadio Dallas' },
     ],
   },
+
   {
     nombre: 'K',
     partidos: [
@@ -153,6 +237,7 @@ const GRUPOS: Grupo[] = [
       { fecha: '28/06', hora: '17:30', local: 'RD Congo', visitante: 'Uzbekistán', estadio: 'Estadio Atlanta' },
     ],
   },
+
   {
     nombre: 'L',
     partidos: [
@@ -167,7 +252,7 @@ const GRUPOS: Grupo[] = [
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COLORES POR GRUPO
+// COLORES
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GRUPO_COLORS: Record<string, string> = {
@@ -186,7 +271,7 @@ const GRUPO_COLORS: Record<string, string> = {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PÁGINA PRINCIPAL
+// PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function GruposPage() {
@@ -201,7 +286,6 @@ export default function GruposPage() {
     if (!query) return GRUPOS
 
     return GRUPOS.flatMap((grupo) => {
-      // ¿coincide el nombre del grupo? (ej: "grupo a", "a")
       const matchGrupo =
         normalizar(`grupo ${grupo.nombre}`).includes(query) ||
         normalizar(grupo.nombre) === query
@@ -210,39 +294,54 @@ export default function GruposPage() {
         const matchPais =
           normalizar(p.local).includes(query) ||
           normalizar(p.visitante).includes(query)
-        const matchHora = p.hora.includes(query) || p.fecha.includes(query)
-        const matchEstadio = normalizar(p.estadio).includes(query)
-        return matchGrupo || matchPais || matchHora || matchEstadio
+
+        const matchHora =
+          p.hora.includes(query) || p.fecha.includes(query)
+
+        const matchEstadio =
+          normalizar(p.estadio).includes(query)
+
+        return (
+          matchGrupo ||
+          matchPais ||
+          matchHora ||
+          matchEstadio
+        )
       })
 
       if (matchGrupo) {
-        // mostrar todos los partidos del grupo
         return [{ ...grupo }]
       }
+
       if (partidosFiltrados.length > 0) {
         return [{ ...grupo, partidos: partidosFiltrados }]
       }
+
       return []
     })
   }, [query])
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
+      {/* HEADER */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 py-4 space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🏆</span>
+
             <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-tight">
+              <h1 className="text-xl font-bold text-slate-900">
                 Grupos — Mundial 2026
               </h1>
-              <p className="text-xs text-slate-500">Horarios en hora de Guatemala (CT)</p>
+
+              <p className="text-xs text-slate-500">
+                Horarios en hora de Guatemala (CT)
+              </p>
             </div>
           </div>
 
           <Input
-            placeholder="Buscar grupo (A, B…), país o estadio…"
+            placeholder="Buscar grupo, país o estadio..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="bg-slate-50"
@@ -250,16 +349,22 @@ export default function GruposPage() {
         </div>
       </div>
 
-      {/* Contenido */}
+      {/* CONTENIDO */}
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
         {gruposFiltrados.length === 0 ? (
           <div className="text-center py-20 text-slate-400">
             <div className="text-5xl mb-3">🔍</div>
-            <p>No se encontraron resultados para &quot;{search}&quot;</p>
+
+            <p>
+              No se encontraron resultados para "{search}"
+            </p>
           </div>
         ) : (
           gruposFiltrados.map((grupo) => (
-            <GrupoCard key={grupo.nombre} grupo={grupo} />
+            <GrupoCard
+              key={grupo.nombre}
+              grupo={grupo}
+            />
           ))
         )}
       </div>
@@ -268,11 +373,13 @@ export default function GruposPage() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TARJETA DE GRUPO
+// CARD
 // ─────────────────────────────────────────────────────────────────────────────
 
 function GrupoCard({ grupo }: { grupo: Grupo }) {
-  const colorClass = GRUPO_COLORS[grupo.nombre] ?? 'bg-slate-100 text-slate-700 border-slate-200'
+  const colorClass =
+    GRUPO_COLORS[grupo.nombre] ??
+    'bg-slate-100 text-slate-700 border-slate-200'
 
   return (
     <Card className="overflow-hidden shadow-sm">
@@ -284,8 +391,10 @@ function GrupoCard({ grupo }: { grupo: Grupo }) {
           >
             Grupo {grupo.nombre}
           </Badge>
+
           <span className="text-xs text-slate-400 font-normal">
-            {grupo.partidos.length} partido{grupo.partidos.length !== 1 ? 's' : ''}
+            {grupo.partidos.length} partido
+            {grupo.partidos.length !== 1 ? 's' : ''}
           </span>
         </CardTitle>
       </CardHeader>
@@ -293,7 +402,11 @@ function GrupoCard({ grupo }: { grupo: Grupo }) {
       <CardContent className="p-0">
         <div className="divide-y divide-slate-100">
           {grupo.partidos.map((partido, i) => (
-            <PartidoRow key={i} partido={partido} colorClass={colorClass} />
+            <PartidoRow
+              key={i}
+              partido={partido}
+              colorClass={colorClass}
+            />
           ))}
         </div>
       </CardContent>
@@ -302,7 +415,7 @@ function GrupoCard({ grupo }: { grupo: Grupo }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FILA DE PARTIDO
+// ROW
 // ─────────────────────────────────────────────────────────────────────────────
 
 function PartidoRow({
@@ -314,11 +427,13 @@ function PartidoRow({
 }) {
   return (
     <div className="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2 hover:bg-slate-50 transition-colors">
-      {/* Fecha y hora */}
+
+      {/* FECHA */}
       <div className="flex items-center gap-2 sm:w-36 shrink-0">
         <span className="text-xs font-semibold text-slate-500 tabular-nums">
           {partido.fecha}
         </span>
+
         <Badge
           variant="outline"
           className={`text-xs font-mono px-1.5 py-0 ${colorClass}`}
@@ -327,14 +442,34 @@ function PartidoRow({
         </Badge>
       </div>
 
-      {/* Equipos */}
-      <div className="flex-1 flex items-center gap-2">
-        <span className="font-semibold text-slate-800 text-sm">{partido.local}</span>
-        <span className="text-slate-400 text-xs font-medium">vs</span>
-        <span className="font-semibold text-slate-800 text-sm">{partido.visitante}</span>
+      {/* EQUIPOS */}
+      <div className="flex-1 flex items-center gap-3 flex-wrap">
+
+        {/* LOCAL */}
+        <div className="flex items-center gap-2 min-w-0">
+          <TeamFlag country={partido.local} />
+
+          <span className="font-semibold text-slate-800 text-sm truncate">
+            {partido.local}
+          </span>
+        </div>
+
+        {/* VS */}
+        <span className="text-slate-400 text-xs font-medium">
+          vs
+        </span>
+
+        {/* VISITANTE */}
+        <div className="flex items-center gap-2 min-w-0">
+          <TeamFlag country={partido.visitante} />
+
+          <span className="font-semibold text-slate-800 text-sm truncate">
+            {partido.visitante}
+          </span>
+        </div>
       </div>
 
-      {/* Estadio */}
+      {/* ESTADIO */}
       <div className="text-xs text-slate-400 sm:text-right truncate max-w-[180px]">
         📍 {partido.estadio}
       </div>

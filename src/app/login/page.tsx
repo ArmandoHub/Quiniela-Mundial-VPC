@@ -97,7 +97,7 @@ function LoginForm() {
 
       // Refresca la sesión y redirige
       router.refresh()
-      router.push('/dashboard')
+      router.push('/partidos')
     } catch (err) {
       console.error(err)
       setError('Ocurrió un error inesperado.')

@@ -1,10 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
 type Tab = 'login' | 'register'
 
@@ -18,9 +25,12 @@ export default function LoginPage() {
           <div className="text-5xl mb-2">🏆</div>
           <CardTitle className="text-2xl">Quiniela Mundial 2026</CardTitle>
           <CardDescription>
-            {tab === 'login' ? 'Ingresa con tu cuenta' : 'Crea tu cuenta con tu código de acceso'}
+            {tab === 'login'
+              ? 'Ingresa con tu cuenta'
+              : 'Crea tu cuenta con tu código de acceso'}
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           {/* Tabs */}
           <div className="flex rounded-lg bg-slate-100 p-1 mb-6">
@@ -34,6 +44,7 @@ export default function LoginPage() {
             >
               Iniciar sesión
             </button>
+
             <button
               onClick={() => setTab('register')}
               className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
@@ -53,9 +64,13 @@ export default function LoginPage() {
   )
 }
 
-// ─── LOGIN ────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// LOGIN
+// ─────────────────────────────────────────────────────────────────────────────
 
 function LoginForm() {
+  const router = useRouter()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -63,23 +78,39 @@ function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setError('')
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    try {
+      setLoading(true)
+      setError('')
 
-    if (error) {
-      setError('Credenciales incorrectas. Verifica tu email y contraseña.')
+      const supabase = createClient()
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        setError('Credenciales incorrectas. Verifica tu email y contraseña.')
+        return
+      }
+
+      // Refresca la sesión y redirige
+      router.refresh()
+      router.push('/dashboard')
+    } catch (err) {
+      console.error(err)
+      setError('Ocurrió un error inesperado.')
+    } finally {
       setLoading(false)
     }
-    // Si no hay error, Supabase redirige automáticamente o el middleware maneja la sesión
   }
 
   return (
     <form onSubmit={handleLogin} className="space-y-4">
       <div className="space-y-2">
         <label className="text-sm font-medium text-slate-700">Email</label>
+
         <Input
           type="email"
           placeholder="tu@email.com"
@@ -89,8 +120,12 @@ function LoginForm() {
           disabled={loading}
         />
       </div>
+
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Contraseña</label>
+        <label className="text-sm font-medium text-slate-700">
+          Contraseña
+        </label>
+
         <Input
           type="password"
           placeholder="••••••••"
@@ -100,7 +135,9 @@ function LoginForm() {
           disabled={loading}
         />
       </div>
+
       {error && <p className="text-sm text-red-500">{error}</p>}
+
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Ingresando...' : 'Ingresar'}
       </Button>
@@ -108,7 +145,9 @@ function LoginForm() {
   )
 }
 
-// ─── REGISTRO ─────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// REGISTRO
+// ─────────────────────────────────────────────────────────────────────────────
 
 function RegisterForm() {
   const [displayName, setDisplayName] = useState('')
@@ -128,6 +167,7 @@ function RegisterForm() {
       setError('Las contraseñas no coinciden.')
       return
     }
+
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.')
       return
@@ -137,7 +177,7 @@ function RegisterForm() {
 
     const supabase = createClient()
 
-    // 1. Verificar que el código existe y está disponible (pre-check antes de crear usuario)
+    // 1. Verificar código
     const { data: codeCheck } = await supabase
       .from('access_codes')
       .select('id')
@@ -146,40 +186,49 @@ function RegisterForm() {
       .single()
 
     if (!codeCheck) {
-      setError('Código de acceso inválido o ya utilizado. Verifica el código que recibiste al pagar.')
+      setError(
+        'Código de acceso inválido o ya utilizado. Verifica el código que recibiste al pagar.'
+      )
       setLoading(false)
       return
     }
 
-    // 2. Crear usuario en Supabase Auth
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { display_name: displayName },
-      },
-    })
+    // 2. Crear usuario
+    const { data: authData, error: signUpError } =
+      await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: displayName,
+          },
+        },
+      })
 
     if (signUpError || !authData.user) {
-      setError(signUpError?.message ?? 'Error al crear la cuenta. Intenta de nuevo.')
+      setError(signUpError?.message ?? 'Error al crear la cuenta.')
       setLoading(false)
       return
     }
 
-    // 3. Reclamar el código de forma atómica (evita race conditions)
-    const { data: claimResult, error: claimError } = await supabase
-      .rpc('claim_access_code', {
+    // 3. Reclamar código
+    const { data: claimResult, error: claimError } = await supabase.rpc(
+      'claim_access_code',
+      {
         p_code: accessCode.trim().toUpperCase(),
         p_user_id: authData.user.id,
-      })
+      }
+    )
 
     if (claimError || !claimResult?.success) {
       const reason = claimResult?.error
+
       if (reason === 'already_used') {
-        setError('Este código ya fue utilizado. Contacta al administrador.')
+        setError('Este código ya fue utilizado.')
       } else {
-        setError('No se pudo validar el código de acceso. Intenta de nuevo.')
+        setError('No se pudo validar el código.')
       }
+
       setLoading(false)
       return
     }
@@ -192,10 +241,13 @@ function RegisterForm() {
     return (
       <div className="text-center space-y-3">
         <div className="text-4xl">🎉</div>
+
         <p className="font-medium">¡Cuenta creada!</p>
+
         <p className="text-sm text-muted-foreground">
           Ya puedes iniciar sesión con tu email y contraseña.
         </p>
+
         <Button className="w-full" onClick={() => window.location.reload()}>
           Ir a iniciar sesión
         </Button>
@@ -206,7 +258,10 @@ function RegisterForm() {
   return (
     <form onSubmit={handleRegister} className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Nombre para mostrar</label>
+        <label className="text-sm font-medium text-slate-700">
+          Nombre para mostrar
+        </label>
+
         <Input
           type="text"
           placeholder="Tu nombre"
@@ -216,8 +271,10 @@ function RegisterForm() {
           disabled={loading}
         />
       </div>
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-slate-700">Email</label>
+
         <Input
           type="email"
           placeholder="tu@email.com"
@@ -227,8 +284,12 @@ function RegisterForm() {
           disabled={loading}
         />
       </div>
+
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Contraseña</label>
+        <label className="text-sm font-medium text-slate-700">
+          Contraseña
+        </label>
+
         <Input
           type="password"
           placeholder="Mínimo 6 caracteres"
@@ -238,8 +299,12 @@ function RegisterForm() {
           disabled={loading}
         />
       </div>
+
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Confirmar contraseña</label>
+        <label className="text-sm font-medium text-slate-700">
+          Confirmar contraseña
+        </label>
+
         <Input
           type="password"
           placeholder="••••••••"
@@ -249,11 +314,15 @@ function RegisterForm() {
           disabled={loading}
         />
       </div>
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-slate-700">
           Código de acceso
-          <span className="text-xs text-muted-foreground font-normal ml-1">(recibido al pagar)</span>
+          <span className="text-xs text-muted-foreground font-normal ml-1">
+            (recibido al pagar)
+          </span>
         </label>
+
         <Input
           type="text"
           placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
@@ -264,7 +333,9 @@ function RegisterForm() {
           className="font-mono text-sm"
         />
       </div>
+
       {error && <p className="text-sm text-red-500">{error}</p>}
+
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Verificando...' : 'Crear cuenta'}
       </Button>

@@ -59,7 +59,7 @@ export default async function PartidosPage() {
       <main className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-4">
           <p className="text-sm text-muted-foreground">
-            Jugando como <strong>{user.email}</strong>
+            Bienvenido <strong>{user.email}</strong>
           </p>
         </div>
 

@@ -243,7 +243,7 @@ export default function TercerosPage() {
             <span className="text-2xl">🥉</span>
             <div>
               <h1 className="text-xl font-bold text-slate-900">
-                Mejores Terceros — Mundial 2026
+                Estadisticas
               </h1>
               <p className="text-xs text-slate-500">
                 Los 8 mejores equipos en 3.er lugar clasifican a eliminatoria

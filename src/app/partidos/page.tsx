@@ -46,7 +46,7 @@ export default async function PartidosPage() {
               <Button variant="outline" size="sm">Ranking</Button>
             </Link>
             <Link href="/terceros">
-              <Button variant="outline" size="sm">Mejores Terceros</Button>
+              <Button variant="outline" size="sm">Estadisticas</Button>
             </Link>
             <Link href="/grupos">
               <Button variant="outline" size="sm">Fase de grupos</Button>

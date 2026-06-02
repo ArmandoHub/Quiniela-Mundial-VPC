@@ -16,14 +16,32 @@ export default async function RankingPage() {
     .select('*')
     .limit(100)
 
+  const handleLogout = async () => {
+    'use server'
+    const supabase = await createClient()
+    await supabase.auth.signOut()
+    redirect('/login')
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <nav className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
-          <span className="font-bold text-lg">🏆 Quiniela Mundial</span>
-          <Link href="/partidos">
-            <Button variant="outline" size="sm">Partidos</Button>
-          </Link>
+          <span className="font-bold text-lg">Quiniela VPC</span>
+          <div className="flex gap-2">
+            <Link href="/partidos">
+              <Button variant="outline" size="sm">Partidos</Button>
+            </Link>
+            <Link href="/terceros">
+              <Button variant="outline" size="sm">Estadísticas</Button>
+            </Link>
+            <Link href="/grupos">
+              <Button variant="outline" size="sm">Fase de grupos</Button>
+            </Link>
+            <form action={handleLogout}>
+              <Button variant="ghost" size="sm" type="submit">Salir</Button>
+            </form>
+          </div>
         </div>
       </nav>
 

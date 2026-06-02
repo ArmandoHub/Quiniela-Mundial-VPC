@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -10,7 +9,6 @@ export default function NavMenu() {
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
-  // Cerrar al hacer click fuera
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -48,6 +46,13 @@ export default function NavMenu() {
       {open && (
         <div className="absolute right-0 mt-1 w-48 rounded-md border border-slate-200 bg-white shadow-lg z-50">
           <div className="py-1">
+            <Link
+              href="/partidos"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            >
+              Partidos
+            </Link>
             <Link
               href="/ranking"
               onClick={() => setOpen(false)}

@@ -4,6 +4,8 @@ import MatchCard from '@/components/MatchCard'
 import Link from 'next/link'
 import NavMenu from '@/components/NavMenu'
 
+export const revalidate = 0   // ← agrega esta línea aquí
+
 export default async function PartidosPage() {
   const supabase = await createClient()
 

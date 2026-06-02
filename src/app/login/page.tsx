@@ -38,7 +38,6 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
-          {/* Tabs */}
           <div className="flex rounded-lg bg-slate-100 p-1 mb-6">
             <button
               onClick={() => setTab('login')}
@@ -69,10 +68,6 @@ export default function LoginPage() {
     </div>
   )
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// LOGIN
-// ─────────────────────────────────────────────────────────────────────────────
 
 function LoginForm() {
   const router = useRouter()
@@ -146,10 +141,6 @@ function LoginForm() {
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// REGISTRO
-// ─────────────────────────────────────────────────────────────────────────────
-
 function RegisterForm() {
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
@@ -177,12 +168,13 @@ function RegisterForm() {
     setLoading(true)
 
     const supabase = createClient()
+    const cleanCode = accessCode.trim()
 
-    // 1. Verificar código
+    // 1. Verificar código (sin forzar mayúsculas)
     const { data: codeCheck } = await supabase
       .from('access_codes')
       .select('id')
-      .eq('code', accessCode.trim().toUpperCase())
+      .eq('code', cleanCode)
       .eq('used', false)
       .single()
 
@@ -207,11 +199,20 @@ function RegisterForm() {
       return
     }
 
-    // 3. Reclamar código
+    // 3. Guardar display_name en la tabla profiles
+    await supabase
+      .from('profiles')
+      .upsert({
+        id: authData.user.id,
+        display_name: displayName,
+        email: email,
+      })
+
+    // 4. Reclamar código (sin forzar mayúsculas)
     const { data: claimResult, error: claimError } = await supabase.rpc(
       'claim_access_code',
       {
-        p_code: accessCode.trim().toUpperCase(),
+        p_code: cleanCode,
         p_user_id: authData.user.id,
       }
     )

@@ -5,17 +5,6 @@ import AdminMatchList from '@/components/AdminMatchList'
 
 const ADMIN_EMAIL = 'josehubb22@gmail.com'
 
-interface Match {
-  id: string
-  home_team: string
-  away_team: string
-  match_time: string
-  home_score: number | null
-  away_score: number | null
-  is_finished: boolean
-  stage: string
-}
-
 export default async function AdminPage() {
   const supabase = await createClient()
 
@@ -25,8 +14,19 @@ export default async function AdminPage() {
 
   const { data: matches } = await supabase
     .from('matches')
-    .select('*')
+    .select('id, home_team, away_team, match_time, home_score, away_score, is_finished, stage')
     .order('match_time', { ascending: true })
+
+  const safeMatches = (matches ?? []).map(m => ({
+    id: m.id as string,
+    home_team: m.home_team as string,
+    away_team: m.away_team as string,
+    match_time: m.match_time as string,
+    home_score: m.home_score as number | null,
+    away_score: m.away_score as number | null,
+    is_finished: m.is_finished as boolean,
+    stage: m.stage as string,
+  }))
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -36,9 +36,8 @@ export default async function AdminPage() {
           <NavMenu />
         </div>
       </nav>
-
       <main className="max-w-3xl mx-auto px-4 py-6">
-        <AdminMatchList matches={(matches ?? []) as Match[]} />
+        <AdminMatchList matches={safeMatches} />
       </main>
     </div>
   )

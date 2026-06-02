@@ -102,7 +102,7 @@ function LoginForm() {
       }
 
       router.refresh()
-      router.push('/partidos')
+      router.push('/bienvenida')
     } catch (err) {
       console.error(err)
       setError('Ocurrió un error inesperado.')

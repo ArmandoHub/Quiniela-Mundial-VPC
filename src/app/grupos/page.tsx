@@ -1,8 +1,12 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import {
   Card,
   CardContent,
@@ -117,7 +121,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '25/06', hora: '19:00', local: 'Sudáfrica', visitante: 'Corea del Sur', estadio: 'Estadio Monterrey' },
     ],
   },
-
   {
     nombre: 'B',
     partidos: [
@@ -129,7 +132,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '24/06', hora: '13:00', local: 'Suiza', visitante: 'Canadá', estadio: 'Estadio Vancouver' },
     ],
   },
-
   {
     nombre: 'C',
     partidos: [
@@ -141,7 +143,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '24/06', hora: '16:00', local: 'Escocia', visitante: 'Brasil', estadio: 'Estadio Miami' },
     ],
   },
-
   {
     nombre: 'D',
     partidos: [
@@ -153,7 +154,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '26/06', hora: '20:00', local: 'Turquía', visitante: 'EE.UU.', estadio: 'Estadio Los Ángeles' },
     ],
   },
-
   {
     nombre: 'E',
     partidos: [
@@ -165,7 +165,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '25/06', hora: '14:00', local: 'Ecuador', visitante: 'Alemania', estadio: 'Estadio Nueva York/NJ' },
     ],
   },
-
   {
     nombre: 'F',
     partidos: [
@@ -177,7 +176,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '26/06', hora: '17:00', local: 'Túnez', visitante: 'Países Bajos', estadio: 'Estadio Kansas City' },
     ],
   },
-
   {
     nombre: 'G',
     partidos: [
@@ -189,7 +187,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '27/06', hora: '21:00', local: 'Nueva Zelanda', visitante: 'Bélgica', estadio: 'Estadio Vancouver' },
     ],
   },
-
   {
     nombre: 'H',
     partidos: [
@@ -201,7 +198,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '27/06', hora: '18:00', local: 'Uruguay', visitante: 'España', estadio: 'Estadio Guadalajara' },
     ],
   },
-
   {
     nombre: 'I',
     partidos: [
@@ -213,7 +209,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '26/06', hora: '13:00', local: 'Senegal', visitante: 'Irak', estadio: 'Estadio Toronto' },
     ],
   },
-
   {
     nombre: 'J',
     partidos: [
@@ -225,7 +220,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '28/06', hora: '20:00', local: 'Jordania', visitante: 'Argentina', estadio: 'Estadio Dallas' },
     ],
   },
-
   {
     nombre: 'K',
     partidos: [
@@ -237,7 +231,6 @@ const GRUPOS: Grupo[] = [
       { fecha: '28/06', hora: '17:30', local: 'RD Congo', visitante: 'Uzbekistán', estadio: 'Estadio Atlanta' },
     ],
   },
-
   {
     nombre: 'L',
     partidos: [
@@ -275,7 +268,14 @@ const GRUPO_COLORS: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function GruposPage() {
+  const router = useRouter()
   const [search, setSearch] = useState('')
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   const normalizar = (s: string) =>
     s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -323,17 +323,36 @@ export default function GruposPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* HEADER */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      {/* NAV */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+          <span className="font-bold text-lg">🏆 Quiniela Mundial</span>
+          <div className="flex gap-2">
+            <Link href="/partidos">
+              <Button variant="outline" size="sm">Partidos</Button>
+            </Link>
+            <Link href="/ranking">
+              <Button variant="outline" size="sm">Ranking</Button>
+            </Link>
+            <Link href="/terceros">
+              <Button variant="outline" size="sm">Estadísticas</Button>
+            </Link>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              Salir
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      {/* HEADER con buscador */}
+      <div className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 py-4 space-y-3">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🏆</span>
-
+            <span className="text-2xl">📋</span>
             <div>
               <h1 className="text-xl font-bold text-slate-900">
                 Grupos — Mundial 2026
               </h1>
-
               <p className="text-xs text-slate-500">
                 Horarios en hora de Guatemala (CT)
               </p>
@@ -354,17 +373,11 @@ export default function GruposPage() {
         {gruposFiltrados.length === 0 ? (
           <div className="text-center py-20 text-slate-400">
             <div className="text-5xl mb-3">🔍</div>
-
-            <p>
-              No se encontraron resultados para "{search}"
-            </p>
+            <p>No se encontraron resultados para "{search}"</p>
           </div>
         ) : (
           gruposFiltrados.map((grupo) => (
-            <GrupoCard
-              key={grupo.nombre}
-              grupo={grupo}
-            />
+            <GrupoCard key={grupo.nombre} grupo={grupo} />
           ))
         )}
       </div>
@@ -448,21 +461,17 @@ function PartidoRow({
         {/* LOCAL */}
         <div className="flex items-center gap-2 min-w-0">
           <TeamFlag country={partido.local} />
-
           <span className="font-semibold text-slate-800 text-sm truncate">
             {partido.local}
           </span>
         </div>
 
         {/* VS */}
-        <span className="text-slate-400 text-xs font-medium">
-          vs
-        </span>
+        <span className="text-slate-400 text-xs font-medium">vs</span>
 
         {/* VISITANTE */}
         <div className="flex items-center gap-2 min-w-0">
           <TeamFlag country={partido.visitante} />
-
           <span className="font-semibold text-slate-800 text-sm truncate">
             {partido.visitante}
           </span>

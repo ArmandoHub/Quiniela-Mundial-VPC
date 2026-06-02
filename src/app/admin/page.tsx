@@ -1,9 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import AdminMatchList from '@/components/AdminMatchList'
 import NavMenu from '@/components/NavMenu'
+import AdminMatchList from '@/components/AdminMatchList'
 
 const ADMIN_EMAIL = 'josehubb22@gmail.com'
+
+interface Match {
+  id: string
+  home_team: string
+  away_team: string
+  match_time: string
+  home_score: number | null
+  away_score: number | null
+  is_finished: boolean
+  stage: string
+}
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -27,7 +38,7 @@ export default async function AdminPage() {
       </nav>
 
       <main className="max-w-3xl mx-auto px-4 py-6">
-        <AdminMatchList matches={matches ?? []} />
+        <AdminMatchList matches={(matches ?? []) as Match[]} />
       </main>
     </div>
   )

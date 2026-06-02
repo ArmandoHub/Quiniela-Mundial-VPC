@@ -44,39 +44,32 @@ export default async function PartidosPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Nav */}
       <nav className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
           <span className="font-bold text-lg">⚽ Quiniela VPC</span>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
                 Menú ▾
               </Button>
             </DropdownMenuTrigger>
-
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
                 <Link href="/ranking" className="w-full cursor-pointer">
                   🏆 Ranking
                 </Link>
               </DropdownMenuItem>
-
               <DropdownMenuItem asChild>
                 <Link href="/terceros" className="w-full cursor-pointer">
                   📊 Estadísticas
                 </Link>
               </DropdownMenuItem>
-
               <DropdownMenuItem asChild>
                 <Link href="/grupos" className="w-full cursor-pointer">
                   📋 Fase de grupos
                 </Link>
               </DropdownMenuItem>
-
               <DropdownMenuSeparator />
-
               <DropdownMenuItem asChild>
                 <form action={handleLogout} className="w-full">
                   <button type="submit" className="w-full text-left text-red-500">
@@ -88,8 +81,7 @@ export default async function PartidosPage() {
           </DropdownMenu>
         </div>
       </nav>
-
-      {/* Contenido */}
+      
       <main className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-4">
           <p className="text-sm text-muted-foreground">

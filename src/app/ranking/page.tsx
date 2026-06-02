@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import NavMenu from '@/components/NavMenu'
 
 export default async function RankingPage() {
   const supabase = await createClient()
@@ -28,20 +29,7 @@ export default async function RankingPage() {
       <nav className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
           <span className="font-bold text-lg">Quiniela VPC</span>
-          <div className="flex gap-2">
-            <Link href="/partidos">
-              <Button variant="outline" size="sm">Partidos</Button>
-            </Link>
-            <Link href="/terceros">
-              <Button variant="outline" size="sm">Estadísticas</Button>
-            </Link>
-            <Link href="/grupos">
-              <Button variant="outline" size="sm">Fase de grupos</Button>
-            </Link>
-            <form action={handleLogout}>
-              <Button variant="ghost" size="sm" type="submit">Salir</Button>
-            </form>
-          </div>
+          <NavMenu />
         </div>
       </nav>
 

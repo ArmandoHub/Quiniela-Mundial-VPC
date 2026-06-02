@@ -4,6 +4,9 @@ import NavMenu from '@/components/NavMenu'
 import AdminMatchList from '@/components/AdminMatchList'
 
 const ADMIN_EMAIL = 'josehubb22@gmail.com'
+//Dickson.luna17@gmail.com 
+//Ulisessolis94@gmail.com
+//caperezpastor@gmail.com
 
 export default async function AdminPage() {
   const supabase = await createClient()

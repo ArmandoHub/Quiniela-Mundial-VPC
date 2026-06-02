@@ -47,6 +47,13 @@ export default function NavMenu() {
         <div className="absolute right-0 mt-1 w-48 rounded-md border border-slate-200 bg-white shadow-lg z-50">
           <div className="py-1">
             <Link
+              href="/bienvenida"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            >
+              Bienvenida
+            </Link>
+            <Link
               href="/partidos"
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
@@ -59,13 +66,6 @@ export default function NavMenu() {
               className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
             >
               Ranking
-            </Link>
-            <Link
-              href="/bienvenida"
-              onClick={() => setOpen(false)}
-              className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-            >
-              Bienvenida
             </Link>
             <Link
               href="/terceros"

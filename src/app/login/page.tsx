@@ -22,8 +22,14 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="text-5xl mb-2">⚽</div>
-          <CardTitle className="text-2xl">Quiniela Mundial 2026</CardTitle>
+          <div className="flex justify-center mb-3">
+            <img
+              src="/images/vpc-logo.png"
+              alt="VPC Logo"
+              className="h-16 w-auto object-contain"
+            />
+          </div>
+          <CardTitle className="text-2xl">Quiniela VPC</CardTitle>
           <CardDescription>
             {tab === 'login'
               ? 'Ingresa con tu cuenta'
@@ -95,7 +101,6 @@ function LoginForm() {
         return
       }
 
-      // Refresca la sesión y redirige
       router.refresh()
       router.push('/partidos')
     } catch (err) {
@@ -110,7 +115,6 @@ function LoginForm() {
     <form onSubmit={handleLogin} className="space-y-4">
       <div className="space-y-2">
         <label className="text-sm font-medium text-slate-700">Email</label>
-
         <Input
           type="email"
           placeholder="tu@email.com"
@@ -122,13 +126,10 @@ function LoginForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">
-          Contraseña
-        </label>
-
+        <label className="text-sm font-medium text-slate-700">Contraseña</label>
         <Input
           type="password"
-          placeholder="••••••••"
+          placeholder="••••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -186,24 +187,19 @@ function RegisterForm() {
       .single()
 
     if (!codeCheck) {
-      setError(
-        'Código de acceso inválido o ya utilizado. Verifica el código que recibiste al pagar.'
-      )
+      setError('Código de acceso inválido o ya utilizado. Verifica el código que recibiste al pagar.')
       setLoading(false)
       return
     }
 
     // 2. Crear usuario
-    const { data: authData, error: signUpError } =
-      await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            display_name: displayName,
-          },
-        },
-      })
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { display_name: displayName },
+      },
+    })
 
     if (signUpError || !authData.user) {
       setError(signUpError?.message ?? 'Error al crear la cuenta.')
@@ -222,13 +218,11 @@ function RegisterForm() {
 
     if (claimError || !claimResult?.success) {
       const reason = claimResult?.error
-
       if (reason === 'already_used') {
         setError('Este código ya fue utilizado.')
       } else {
         setError('No se pudo validar el código.')
       }
-
       setLoading(false)
       return
     }
@@ -241,13 +235,10 @@ function RegisterForm() {
     return (
       <div className="text-center space-y-3">
         <div className="text-4xl">🎉</div>
-
         <p className="font-medium">¡Cuenta creada!</p>
-
         <p className="text-sm text-muted-foreground">
           Ya puedes iniciar sesión con tu email y contraseña.
         </p>
-
         <Button className="w-full" onClick={() => window.location.reload()}>
           Ir a iniciar sesión
         </Button>
@@ -258,10 +249,7 @@ function RegisterForm() {
   return (
     <form onSubmit={handleRegister} className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">
-          Nombre para mostrar
-        </label>
-
+        <label className="text-sm font-medium text-slate-700">Nombre para mostrar</label>
         <Input
           type="text"
           placeholder="Tu nombre"
@@ -274,7 +262,6 @@ function RegisterForm() {
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-slate-700">Email</label>
-
         <Input
           type="email"
           placeholder="tu@email.com"
@@ -286,10 +273,7 @@ function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">
-          Contraseña
-        </label>
-
+        <label className="text-sm font-medium text-slate-700">Contraseña</label>
         <Input
           type="password"
           placeholder="Mínimo 6 caracteres"
@@ -301,10 +285,7 @@ function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">
-          Confirmar contraseña
-        </label>
-
+        <label className="text-sm font-medium text-slate-700">Confirmar contraseña</label>
         <Input
           type="password"
           placeholder="••••••••"
@@ -322,7 +303,6 @@ function RegisterForm() {
             (recibido al pagar)
           </span>
         </label>
-
         <Input
           type="text"
           placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"

@@ -17,19 +17,16 @@ export default async function PartidosPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Traer partidos
   const { data: matches } = await supabase
     .from('matches')
     .select('*')
     .order('match_time', { ascending: true })
-
-  // Traer predicciones del usuario
+  
   const { data: predictions } = await supabase
     .from('predictions')
     .select('*')
     .eq('user_id', user.id)
 
-  // Indexar predicciones por match_id
   const predictionMap = (predictions ?? []).reduce((acc, p) => {
     acc[p.match_id] = p
     return acc

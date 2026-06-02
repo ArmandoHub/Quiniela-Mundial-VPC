@@ -176,7 +176,7 @@ function RegisterForm() {
       .select('id')
       .eq('code', cleanCode)
       .eq('used', false)
-      .single()
+      .maybeSingle()
 
     if (!codeCheck) {
       setError('Código de acceso inválido o ya utilizado. Verifica el código que recibiste al pagar.')

@@ -1,6 +1,10 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import {
   Card,
   CardContent,
@@ -93,7 +97,7 @@ function TeamFlag({ country }: { country: string }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COLORES DE GRUPOS (mismo que /grupos)
+// COLORES DE GRUPOS
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GRUPO_COLORS: Record<string, string> = {
@@ -113,9 +117,6 @@ const GRUPO_COLORS: Record<string, string> = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DATOS
-// Ordena los equipos de cada grupo de 1º a 4º.
-// El 3er lugar (índice 2) es el que compite por los "mejores terceros".
-// Actualiza puntos / gf / gc conforme avance el torneo.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GRUPOS: Grupo[] = [
@@ -234,16 +235,45 @@ const GRUPOS: Grupo[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function TercerosPage() {
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* NAV */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+          <span className="font-bold text-lg">⚽ Quiniela Mundial</span>
+          <div className="flex gap-2">
+            <Link href="/partidos">
+              <Button variant="outline" size="sm">Partidos</Button>
+            </Link>
+            <Link href="/ranking">
+              <Button variant="outline" size="sm">Ranking</Button>
+            </Link>
+            <Link href="/grupos">
+              <Button variant="outline" size="sm">Fase de grupos</Button>
+            </Link>
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              Salir
+            </Button>
+          </div>
+        </div>
+      </nav>
+
       {/* HEADER */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <div className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🥉</span>
             <div>
               <h1 className="text-xl font-bold text-slate-900">
-                Estadisticas
+                Estadísticas
               </h1>
               <p className="text-xs text-slate-500">
                 Los 8 mejores equipos en 3.er lugar clasifican a eliminatoria
@@ -334,7 +364,6 @@ function EquipoRow({
     >
       {/* PAÍS */}
       <div className="flex items-center gap-2 min-w-0">
-        {/* Posición */}
         <span
           className={`text-[11px] font-bold w-4 shrink-0 ${
             posicion === 1

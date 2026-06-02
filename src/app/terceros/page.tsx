@@ -1,105 +1,8 @@
-'use client'
-
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import NavMenu from '@/components/NavMenu'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TIPOS
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface Equipo {
-  pais: string
-  puntos: number
-  gf: number  // goles a favor
-  gc: number  // goles en contra
-}
-
-interface Grupo {
-  nombre: string
-  equipos: Equipo[] // ya ordenados por posición (1º→4º)
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// BANDERAS
-// ─────────────────────────────────────────────────────────────────────────────
-
-const FLAGS: Record<string, string> = {
-  'México': 'mx',
-  'Sudáfrica': 'za',
-  'Corea del Sur': 'kr',
-  'Chequia': 'cz',
-  'Canadá': 'ca',
-  'Bosnia-Herzegovina': 'ba',
-  'Qatar': 'qa',
-  'Suiza': 'ch',
-  'Brasil': 'br',
-  'Marruecos': 'ma',
-  'Haití': 'ht',
-  'Escocia': 'gb-sct',
-  'EE.UU.': 'us',
-  'Paraguay': 'py',
-  'Australia': 'au',
-  'Turquía': 'tr',
-  'Alemania': 'de',
-  'Curazao': 'cw',
-  'Costa de Marfil': 'ci',
-  'Ecuador': 'ec',
-  'Países Bajos': 'nl',
-  'Japón': 'jp',
-  'Suecia': 'se',
-  'Túnez': 'tn',
-  'Bélgica': 'be',
-  'Egipto': 'eg',
-  'Irán': 'ir',
-  'Nueva Zelanda': 'nz',
-  'España': 'es',
-  'Cabo Verde': 'cv',
-  'Arabia Saudita': 'sa',
-  'Uruguay': 'uy',
-  'Francia': 'fr',
-  'Senegal': 'sn',
-  'Irak': 'iq',
-  'Noruega': 'no',
-  'Argentina': 'ar',
-  'Argelia': 'dz',
-  'Austria': 'at',
-  'Jordania': 'jo',
-  'Portugal': 'pt',
-  'RD Congo': 'cd',
-  'Uzbekistán': 'uz',
-  'Colombia': 'co',
-  'Inglaterra': 'gb-eng',
-  'Croacia': 'hr',
-  'Ghana': 'gh',
-  'Panamá': 'pa',
-}
-
-function TeamFlag({ country }: { country: string }) {
-  const code = FLAGS[country]
-  if (!code) return null
-  return (
-    <img
-      src={`https://flagcdn.com/${code}.svg`}
-      alt={country}
-      className="h-4 w-6 object-cover rounded-[2px] border border-slate-200 shadow-sm shrink-0"
-      loading="lazy"
-    />
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// COLORES DE GRUPOS
-// ─────────────────────────────────────────────────────────────────────────────
+const GRUPOS_ORDEN = ['A','B','C','D','E','F','G','H','I','J','K','L']
 
 const GRUPO_COLORS: Record<string, string> = {
   A: 'bg-red-100 text-red-700 border-red-200',
@@ -116,295 +19,226 @@ const GRUPO_COLORS: Record<string, string> = {
   L: 'bg-pink-100 text-pink-700 border-pink-200',
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DATOS
-// ─────────────────────────────────────────────────────────────────────────────
+const FLAGS: Record<string, string> = {
+  'Mexico': 'mx', 'México': 'mx',
+  'Sudafrica': 'za', 'Sudáfrica': 'za',
+  'Corea del Sur': 'kr',
+  'Chequia': 'cz',
+  'Canada': 'ca', 'Canadá': 'ca',
+  'Bosnia-Herzegovina': 'ba',
+  'Qatar': 'qa',
+  'Suiza': 'ch',
+  'Brasil': 'br',
+  'Marruecos': 'ma',
+  'Haiti': 'ht', 'Haití': 'ht',
+  'Escocia': 'gb-sct',
+  'EE.UU.': 'us',
+  'Paraguay': 'py',
+  'Australia': 'au',
+  'Turquia': 'tr', 'Turquía': 'tr',
+  'Alemania': 'de',
+  'Curazao': 'cw',
+  'Costa de Marfil': 'ci',
+  'Ecuador': 'ec',
+  'Paises Bajos': 'nl', 'Países Bajos': 'nl',
+  'Japon': 'jp', 'Japón': 'jp',
+  'Suecia': 'se',
+  'Tunez': 'tn', 'Túnez': 'tn',
+  'Belgica': 'be', 'Bélgica': 'be',
+  'Egipto': 'eg',
+  'Iran': 'ir', 'Irán': 'ir',
+  'Nueva Zelanda': 'nz',
+  'Espana': 'es', 'España': 'es',
+  'Cabo Verde': 'cv',
+  'Arabia Saudita': 'sa',
+  'Uruguay': 'uy',
+  'Francia': 'fr',
+  'Senegal': 'sn',
+  'Irak': 'iq',
+  'Noruega': 'no',
+  'Argentina': 'ar',
+  'Argelia': 'dz',
+  'Austria': 'at',
+  'Jordania': 'jo',
+  'Portugal': 'pt',
+  'RD Congo': 'cd',
+  'Uzbekistan': 'uz', 'Uzbekistán': 'uz',
+  'Colombia': 'co',
+  'Inglaterra': 'gb-eng',
+  'Croacia': 'hr',
+  'Ghana': 'gh',
+  'Panama': 'pa', 'Panamá': 'pa',
+}
 
-const GRUPOS: Grupo[] = [
-  {
-    nombre: 'A',
-    equipos: [
-      { pais: 'México',       puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Corea del Sur',puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Chequia',      puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Sudáfrica',    puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'B',
-    equipos: [
-      { pais: 'Canadá',             puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Suiza',              puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Bosnia-Herzegovina', puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Qatar',              puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'C',
-    equipos: [
-      { pais: 'Brasil',   puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Marruecos',puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Escocia',  puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Haití',    puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'D',
-    equipos: [
-      { pais: 'EE.UU.',   puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Australia',puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Turquía',  puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Paraguay', puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'E',
-    equipos: [
-      { pais: 'Alemania',        puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Ecuador',         puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Costa de Marfil', puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Curazao',         puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'F',
-    equipos: [
-      { pais: 'Países Bajos',puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Japón',       puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Suecia',      puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Túnez',       puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'G',
-    equipos: [
-      { pais: 'Bélgica',       puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Irán',          puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Egipto',        puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Nueva Zelanda', puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'H',
-    equipos: [
-      { pais: 'España',        puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Uruguay',       puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Arabia Saudita',puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Cabo Verde',    puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'I',
-    equipos: [
-      { pais: 'Francia',  puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Noruega',  puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Senegal',  puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Irak',     puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'J',
-    equipos: [
-      { pais: 'Argentina',puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Austria',  puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Argelia',  puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Jordania', puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'K',
-    equipos: [
-      { pais: 'Portugal',   puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Colombia',   puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Uzbekistán', puntos: 0, gf: 0, gc: 0 },
-      { pais: 'RD Congo',   puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-  {
-    nombre: 'L',
-    equipos: [
-      { pais: 'Inglaterra',puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Croacia',   puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Ghana',     puntos: 0, gf: 0, gc: 0 },
-      { pais: 'Panamá',    puntos: 0, gf: 0, gc: 0 },
-    ],
-  },
-]
+interface Match {
+  id: string
+  home_team: string
+  away_team: string
+  home_score: number | null
+  away_score: number | null
+  is_finished: boolean
+  group_name: string
+}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PAGE
-// ─────────────────────────────────────────────────────────────────────────────
+interface TeamStats {
+  pais: string
+  pts: number
+  pj: number
+  gf: number
+  gc: number
+}
 
-export default function TercerosPage() {
-  const router = useRouter()
+function calcularGrupos(matches: Match[]): Record<string, TeamStats[]> {
+  const grupos: Record<string, Record<string, TeamStats>> = {}
 
-  const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
+  for (const m of matches) {
+    const g = m.group_name
+    if (!grupos[g]) grupos[g] = {}
+
+    for (const team of [m.home_team, m.away_team]) {
+      if (!grupos[g][team]) {
+        grupos[g][team] = { pais: team, pts: 0, pj: 0, gf: 0, gc: 0 }
+      }
+    }
+
+    if (!m.is_finished || m.home_score === null || m.away_score === null) continue
+
+    const home = grupos[g][m.home_team]
+    const away = grupos[g][m.away_team]
+
+    home.pj++; away.pj++
+    home.gf += m.home_score; home.gc += m.away_score
+    away.gf += m.away_score; away.gc += m.home_score
+
+    if (m.home_score > m.away_score) {
+      home.pts += 3
+    } else if (m.home_score < m.away_score) {
+      away.pts += 3
+    } else {
+      home.pts += 1; away.pts += 1
+    }
   }
+
+  const resultado: Record<string, TeamStats[]> = {}
+  for (const g of GRUPOS_ORDEN) {
+    if (!grupos[g]) continue
+    resultado[g] = Object.values(grupos[g]).sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts
+      const dgB = b.gf - b.gc
+      const dgA = a.gf - a.gc
+      if (dgB !== dgA) return dgB - dgA
+      return b.gf - a.gf
+    })
+  }
+
+  return resultado
+}
+
+export default async function TercerosPage() {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: matches } = await supabase
+    .from('matches')
+    .select('id, home_team, away_team, home_score, away_score, is_finished, group_name')
+    .eq('stage', 'group')
+
+  const grupos = calcularGrupos(matches ?? [])
 
   return (
     <div className="min-h-screen bg-slate-50">
-    <nav className="bg-white border-b sticky top-0 z-10">
-      <div className="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
-        <span className="font-bold text-lg">Quiniela VPC</span>
-        <NavMenu />
-      </div>
-    </nav>
+      <nav className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+          <span className="font-bold text-lg">Quiniela VPC</span>
+          <NavMenu />
+        </div>
+      </nav>
 
-      {/* HEADER */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl"></span>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900">
-                Estadísticas
-              </h1>
-              <p className="text-xs text-slate-500">
-                Estadisticas de los paises
-              </p>
-            </div>
-          </div>
+          <h1 className="text-xl font-bold text-slate-900">Estadisticas</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Los 8 mejores terceros lugares clasifican a eliminatoria
+          </p>
         </div>
       </div>
 
-      {/* GRID DE GRUPOS */}
       <div className="max-w-5xl mx-auto px-4 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {GRUPOS.map((grupo) => (
-          <GrupoCard key={grupo.nombre} grupo={grupo} />
-        ))}
+        {GRUPOS_ORDEN.map(g => {
+          const equipos = grupos[g]
+          if (!equipos) return null
+          const colorClass = GRUPO_COLORS[g] ?? 'bg-slate-100 text-slate-700 border-slate-200'
+
+          return (
+            <div key={g} className="bg-white rounded-xl border shadow-sm overflow-hidden">
+              {/* Header */}
+              <div className="px-4 py-2.5 border-b border-slate-100 flex items-center gap-2">
+                <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full border ${colorClass}`}>
+                  Grupo {g}
+                </span>
+              </div>
+
+              {/* Columnas */}
+              <div className="grid grid-cols-[1fr_2.5rem_2.5rem_2.5rem_2.5rem] px-3 py-1.5 bg-slate-50 border-b border-slate-100">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Pais</span>
+                {['Pts','GF','GC','DG'].map(col => (
+                  <span key={col} className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide text-center">
+                    {col}
+                  </span>
+                ))}
+              </div>
+
+              {/* Filas */}
+              <div className="divide-y divide-slate-100">
+                {equipos.map((equipo, i) => {
+                  const pos = i + 1
+                  const esTercero = pos === 3
+                  const dif = equipo.gf - equipo.gc
+                  const difLabel = dif > 0 ? `+${dif}` : `${dif}`
+                  const flagCode = FLAGS[equipo.pais]
+
+                  return (
+                    <div
+                      key={equipo.pais}
+                      className={`grid grid-cols-[1fr_2.5rem_2.5rem_2.5rem_2.5rem] items-center px-3 py-2 ${
+                        esTercero ? 'bg-blue-50' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`text-[11px] font-bold w-4 shrink-0 ${
+                          pos === 1 ? 'text-yellow-500' :
+                          pos === 2 ? 'text-slate-400' :
+                          esTercero ? 'text-blue-500' : 'text-slate-300'
+                        }`}>{pos}</span>
+                        {flagCode && (
+                          <img
+                            src={`https://flagcdn.com/${flagCode}.svg`}
+                            alt={equipo.pais}
+                            className="h-4 w-6 object-cover rounded-sm border border-slate-200 shrink-0"
+                          />
+                        )}
+                        <span className={`text-xs truncate ${esTercero ? 'font-bold text-blue-800' : 'font-medium text-slate-700'}`}>
+                          {equipo.pais}
+                        </span>
+                      </div>
+                      <span className={`text-center text-xs font-bold tabular-nums ${esTercero ? 'text-blue-800' : 'text-slate-700'}`}>
+                        {equipo.pts}
+                      </span>
+                      <span className="text-center text-xs tabular-nums text-slate-500">{equipo.gf}</span>
+                      <span className="text-center text-xs tabular-nums text-slate-500">{equipo.gc}</span>
+                      <span className={`text-center text-xs tabular-nums font-medium ${
+                        dif > 0 ? 'text-emerald-600' : dif < 0 ? 'text-red-500' : 'text-slate-400'
+                      }`}>{difLabel}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
       </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// CARD DE GRUPO
-// ─────────────────────────────────────────────────────────────────────────────
-
-function GrupoCard({ grupo }: { grupo: Grupo }) {
-  const colorClass =
-    GRUPO_COLORS[grupo.nombre] ?? 'bg-slate-100 text-slate-700 border-slate-200'
-
-  return (
-    <Card className="overflow-hidden shadow-sm">
-      <CardHeader className="py-2.5 px-4 border-b border-slate-100">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Badge
-            variant="outline"
-            className={`text-sm font-bold px-2.5 py-0.5 ${colorClass}`}
-          >
-            Grupo {grupo.nombre}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="p-0">
-        {/* Cabecera de columnas */}
-        <div className="grid grid-cols-[1fr_2.5rem_2.5rem_2.5rem_2.5rem] px-3 py-1.5 bg-slate-50 border-b border-slate-100">
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
-            País
-          </span>
-          {['Pts', 'GF', 'GC', 'DG'].map((col) => (
-            <span
-              key={col}
-              className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide text-center"
-            >
-              {col}
-            </span>
-          ))}
-        </div>
-
-        {/* Filas */}
-        <div className="divide-y divide-slate-100">
-          {grupo.equipos.map((equipo, i) => (
-            <EquipoRow key={equipo.pais} equipo={equipo} posicion={i + 1} />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FILA DE EQUIPO
-// ─────────────────────────────────────────────────────────────────────────────
-
-function EquipoRow({
-  equipo,
-  posicion,
-}: {
-  equipo: Equipo
-  posicion: number
-}) {
-  const esTercero = posicion === 3
-  const dif = equipo.gf - equipo.gc
-  const difLabel = dif > 0 ? `+${dif}` : `${dif}`
-
-  return (
-    <div
-      className={`grid grid-cols-[1fr_2.5rem_2.5rem_2.5rem_2.5rem] items-center px-3 py-2 transition-colors ${
-        esTercero ? 'bg-blue-50' : 'hover:bg-slate-50'
-      }`}
-    >
-      {/* PAÍS */}
-      <div className="flex items-center gap-2 min-w-0">
-        <span
-          className={`text-[11px] font-bold w-4 shrink-0 ${
-            posicion === 1
-              ? 'text-yellow-500'
-              : posicion === 2
-              ? 'text-slate-400'
-              : esTercero
-              ? 'text-blue-500'
-              : 'text-slate-300'
-          }`}
-        >
-          {posicion}
-        </span>
-        <TeamFlag country={equipo.pais} />
-        <span
-          className={`text-xs truncate ${
-            esTercero ? 'font-bold text-blue-800' : 'font-medium text-slate-700'
-          }`}
-        >
-          {equipo.pais}
-        </span>
-      </div>
-
-      {/* PUNTOS */}
-      <span
-        className={`text-center text-xs tabular-nums font-bold ${
-          esTercero ? 'text-blue-800' : 'text-slate-700'
-        }`}
-      >
-        {equipo.puntos}
-      </span>
-
-      {/* GF */}
-      <span className="text-center text-xs tabular-nums text-slate-500">
-        {equipo.gf}
-      </span>
-
-      {/* GC */}
-      <span className="text-center text-xs tabular-nums text-slate-500">
-        {equipo.gc}
-      </span>
-
-      {/* DG */}
-      <span
-        className={`text-center text-xs tabular-nums font-medium ${
-          dif > 0
-            ? 'text-emerald-600'
-            : dif < 0
-            ? 'text-red-500'
-            : 'text-slate-400'
-        }`}
-      >
-        {difLabel}
-      </span>
     </div>
   )
 }

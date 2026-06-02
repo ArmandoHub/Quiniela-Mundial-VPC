@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import NavMenu from '@/components/NavMenu'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIPOS
@@ -324,25 +325,12 @@ export default function GruposPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* NAV */}
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+      <nav className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
           <span className="font-bold text-lg">Quiniela VPC</span>
-          <div className="flex gap-2">
-            <Link href="/partidos">
-              <Button variant="outline" size="sm">Partidos</Button>
-            </Link>
-            <Link href="/ranking">
-              <Button variant="outline" size="sm">Ranking</Button>
-            </Link>
-            <Link href="/terceros">
-              <Button variant="outline" size="sm">Estadísticas</Button>
-            </Link>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              Salir
-            </Button>
-          </div>
+          <NavMenu />
         </div>
-      </nav>
+    </nav>
 
       {/* HEADER con buscador */}
       <div className="bg-white border-b border-slate-200">

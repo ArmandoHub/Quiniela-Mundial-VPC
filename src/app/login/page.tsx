@@ -33,7 +33,7 @@ export default function LoginPage() {
           <CardDescription>
             {tab === 'login'
               ? 'Ingresa con tu cuenta'
-              : 'Crea tu cuenta con tu código de acceso'}
+              : 'Crea tu cuenta con tu codigo de acceso'}
           </CardDescription>
         </CardHeader>
 
@@ -47,7 +47,7 @@ export default function LoginPage() {
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Iniciar sesión
+              Iniciar sesion
             </button>
 
             <button
@@ -92,7 +92,7 @@ function LoginForm() {
       })
 
       if (error) {
-        setError('Credenciales incorrectas. Verifica tu email y contraseña.')
+        setError('Credenciales incorrectas. Verifica tu email y contrasena.')
         return
       }
 
@@ -100,7 +100,7 @@ function LoginForm() {
       router.push('/bienvenida')
     } catch (err) {
       console.error(err)
-      setError('Ocurrió un error inesperado.')
+      setError('Ocurrio un error inesperado.')
     } finally {
       setLoading(false)
     }
@@ -121,7 +121,7 @@ function LoginForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Contraseña</label>
+        <label className="text-sm font-medium text-slate-700">Contrasena</label>
         <Input
           type="password"
           placeholder="••••••••••"
@@ -156,12 +156,12 @@ function RegisterForm() {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden.')
+      setError('Las contrasenias no coinciden.')
       return
     }
 
     if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.')
+      setError('La contrasena debe tener al menos 6 caracteres.')
       return
     }
 
@@ -170,16 +170,16 @@ function RegisterForm() {
     const supabase = createClient()
     const cleanCode = accessCode.trim()
 
-    // 1. Verificar código (sin forzar mayúsculas)
-    const { data: codeCheck } = await supabase
+    // 1. Verificar codigo
+    const { data: codeCheck, error: codeError } = await supabase
       .from('access_codes')
       .select('id')
       .eq('code', cleanCode)
       .eq('used', false)
       .maybeSingle()
 
-    if (!codeCheck) {
-      setError('Código de acceso inválido o ya utilizado. Verifica el código que recibiste al pagar.')
+    if (codeError || !codeCheck) {
+      setError(`Debug - code: "${cleanCode}" | result: ${JSON.stringify(codeCheck)} | error: ${JSON.stringify(codeError)}`)
       setLoading(false)
       return
     }
@@ -199,7 +199,7 @@ function RegisterForm() {
       return
     }
 
-    // 3. Guardar display_name en la tabla profiles
+    // 3. Guardar display_name en profiles
     await supabase
       .from('profiles')
       .upsert({
@@ -208,7 +208,7 @@ function RegisterForm() {
         email: email,
       })
 
-    // 4. Reclamar código (sin forzar mayúsculas)
+    // 4. Reclamar codigo
     const { data: claimResult, error: claimError } = await supabase.rpc(
       'claim_access_code',
       {
@@ -220,9 +220,9 @@ function RegisterForm() {
     if (claimError || !claimResult?.success) {
       const reason = claimResult?.error
       if (reason === 'already_used') {
-        setError('Este código ya fue utilizado.')
+        setError('Este codigo ya fue utilizado.')
       } else {
-        setError('No se pudo validar el código.')
+        setError('No se pudo validar el codigo.')
       }
       setLoading(false)
       return
@@ -236,12 +236,12 @@ function RegisterForm() {
     return (
       <div className="text-center space-y-3">
         <div className="text-4xl">🎉</div>
-        <p className="font-medium">¡Cuenta creada!</p>
+        <p className="font-medium">Cuenta creada!</p>
         <p className="text-sm text-muted-foreground">
-          Ya puedes iniciar sesión con tu email y contraseña.
+          Ya puedes iniciar sesion con tu email y contrasena.
         </p>
         <Button className="w-full" onClick={() => window.location.reload()}>
-          Ir a iniciar sesión
+          Ir a iniciar sesion
         </Button>
       </div>
     )
@@ -274,10 +274,10 @@ function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Contraseña</label>
+        <label className="text-sm font-medium text-slate-700">Contrasena</label>
         <Input
           type="password"
-          placeholder="Mínimo 6 caracteres"
+          placeholder="Minimo 6 caracteres"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -286,7 +286,7 @@ function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Confirmar contraseña</label>
+        <label className="text-sm font-medium text-slate-700">Confirmar contrasena</label>
         <Input
           type="password"
           placeholder="••••••••"
@@ -299,14 +299,14 @@ function RegisterForm() {
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-slate-700">
-          Código de acceso
+          Codigo de acceso
           <span className="text-xs text-muted-foreground font-normal ml-1">
             (recibido al pagar)
           </span>
         </label>
         <Input
           type="text"
-          placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+          placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
           value={accessCode}
           onChange={(e) => setAccessCode(e.target.value)}
           required
@@ -315,7 +315,7 @@ function RegisterForm() {
         />
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-red-500 break-all">{error}</p>}
 
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Verificando...' : 'Crear cuenta'}

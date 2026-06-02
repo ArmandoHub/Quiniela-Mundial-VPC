@@ -21,7 +21,7 @@ export default async function PartidosPage() {
     .from('matches')
     .select('*')
     .order('match_time', { ascending: true })
-  
+
   const { data: predictions } = await supabase
     .from('predictions')
     .select('*')
@@ -43,34 +43,34 @@ export default async function PartidosPage() {
     <div className="min-h-screen bg-slate-50">
       <nav className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
-          <span className="font-bold text-lg">⚽ Quiniela VPC</span>
+          <span className="font-bold text-lg">Quiniela VPC</span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                Menú ▾
+                Menu
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
                 <Link href="/ranking" className="w-full cursor-pointer">
-                  🏆 Ranking
+                  Ranking
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/terceros" className="w-full cursor-pointer">
-                  📊 Estadísticas
+                  Estadisticas
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/grupos" className="w-full cursor-pointer">
-                  📋 Fase de grupos
+                  Fase de grupos
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <form action={handleLogout} className="w-full">
                   <button type="submit" className="w-full text-left text-red-500">
-                    🚪 Salir
+                    Salir
                   </button>
                 </form>
               </DropdownMenuItem>
@@ -78,14 +78,13 @@ export default async function PartidosPage() {
           </DropdownMenu>
         </div>
       </nav>
-      
+
       <main className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-4">
           <p className="text-sm text-muted-foreground">
             Bienvenido <strong>{user.email}</strong>
           </p>
         </div>
-
         <div className="space-y-3">
           {(matches ?? []).map((match) => (
             <MatchCard

@@ -53,10 +53,14 @@ export default function AdminMatchList({ matches }: Props) {
     }))
   }
 
-  const save = async (match: Match) => {
+const save = async (match: Match) => {
   const row = rows[match.id]
   const homeScore = parseInt(row.home_score)
   const awayScore = parseInt(row.away_score)
+
+  console.log('=== GUARDANDO ===', match.home_team, 'vs', match.away_team)
+  console.log('is_finished:', row.is_finished)
+  console.log('scores:', homeScore, '-', awayScore)
 
   if (isNaN(homeScore) || isNaN(awayScore)) {
     setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], error: 'Ingresa ambos marcadores.' } }))
@@ -69,31 +73,27 @@ export default function AdminMatchList({ matches }: Props) {
 
   const { error: updateError } = await supabase
     .from('matches')
-    .update({
-      home_score: homeScore,
-      away_score: awayScore,
-      is_finished: row.is_finished,
-    })
+    .update({ home_score: homeScore, away_score: awayScore, is_finished: row.is_finished })
     .eq('id', match.id)
 
+  console.log('Match update error:', updateError)
+
   if (updateError) {
-    console.error('Error updating match:', updateError)
     setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, error: 'Error al guardar.' } }))
     return
   }
 
-  console.log('Match saved. is_finished:', row.is_finished)
-
   if (row.is_finished) {
+    console.log('Buscando predicciones para match:', match.id)
     const { data: predictions, error: predError } = await supabase
       .from('predictions')
       .select('id, predicted_home, predicted_away')
       .eq('match_id', match.id)
 
-    console.log('Predictions found:', predictions?.length, predError)
+    console.log('Predicciones encontradas:', predictions?.length, 'Error:', predError)
 
     if (predictions && predictions.length > 0) {
-      const updates = predictions.map(p => {
+      for (const p of predictions) {
         let points = 0
         if (p.predicted_home === homeScore && p.predicted_away === awayScore) {
           points = 3
@@ -104,16 +104,13 @@ export default function AdminMatchList({ matches }: Props) {
         ) {
           points = 1
         }
-        console.log(`Prediction ${p.id}: ${p.predicted_home}-${p.predicted_away} vs ${homeScore}-${awayScore} = ${points} pts`)
-        return { id: p.id, points }
-      })
-
-      const results = await Promise.all(
-        updates.map(({ id, points }) =>
-          supabase.from('predictions').update({ points }).eq('id', id)
-        )
-      )
-      console.log('Update results:', results.map(r => r.error ?? 'ok'))
+        console.log(`Prediccion ${p.predicted_home}-${p.predicted_away} = ${points} pts`)
+        const { error: pointsError } = await supabase
+          .from('predictions')
+          .update({ points })
+          .eq('id', p.id)
+        console.log('Points update error:', pointsError)
+      }
     }
   }
 

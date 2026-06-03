@@ -45,7 +45,7 @@ export default async function BienvenidaPage() {
           </p>
           <Link href="/partidos" className="inline-block mt-4">
             <button className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-700 transition-colors">
-              Ver partidos
+              Ver predicciones
             </button>
           </Link>
         </div>
@@ -77,12 +77,12 @@ export default async function BienvenidaPage() {
           </h2>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
-              <div className="text-3xl font-black text-emerald-500">3</div>
+              <div className="text-3xl font-black text-emerald-500">5</div>
               <div className="font-semibold text-slate-800 text-sm mt-1">Resultado exacto</div>
               <div className="text-xs text-slate-500 mt-1">Aciertas el marcador preciso, ej. 2-1.</div>
             </div>
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
-              <div className="text-3xl font-black text-blue-500">1</div>
+              <div className="text-3xl font-black text-blue-500">3</div>
               <div className="font-semibold text-slate-800 text-sm mt-1">Ganador correcto</div>
               <div className="text-xs text-slate-500 mt-1">Aciertas quién gana o si hay empate.</div>
             </div>
@@ -145,7 +145,7 @@ export default async function BienvenidaPage() {
                   S
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800 text-sm">Partidos</p>
+                  <p className="font-semibold text-slate-800 text-sm">Predicciones</p>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Aquí ingresas tus predicciones. Una vez que el partido termina,
                     verás el resultado real y cuántos puntos ganaste.
@@ -175,7 +175,7 @@ export default async function BienvenidaPage() {
                   E
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800 text-sm">Estadísticas</p>
+                  <p className="font-semibold text-slate-800 text-sm">Grupo</p>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Posiciones de cada grupo del Mundial con puntos, goles a favor,
                     goles en contra y diferencia de goles.
@@ -190,7 +190,7 @@ export default async function BienvenidaPage() {
                   G
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800 text-sm">Fase de grupos</p>
+                  <p className="font-semibold text-slate-800 text-sm">Partidos</p>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Calendario completo de los partidos de la fase de grupos con
                     fecha, hora y estadio de cada encuentro.

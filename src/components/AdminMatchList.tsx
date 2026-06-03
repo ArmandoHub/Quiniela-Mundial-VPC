@@ -66,7 +66,9 @@ export default function AdminMatchList({ matches }: Props) {
     setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: true, error: '' } }))
 
     const supabase = createClient()
-    const { error } = await supabase
+
+    // 1. Guardar resultado en matches
+    const { error: updateError } = await supabase
       .from('matches')
       .update({
         home_score: homeScore,
@@ -75,9 +77,47 @@ export default function AdminMatchList({ matches }: Props) {
       })
       .eq('id', match.id)
 
-    if (error) {
+    if (updateError) {
       setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, error: 'Error al guardar.' } }))
       return
+    }
+
+    // 2. Si está finalizado, recalcular puntos directamente desde el cliente
+    // Esto es más confiable que depender solo del trigger
+    if (row.is_finished) {
+      const { data: predictions } = await supabase
+        .from('predictions')
+        .select('id, predicted_home, predicted_away')
+        .eq('match_id', match.id)
+
+      if (predictions && predictions.length > 0) {
+        // Calcular puntos para cada predicción
+        const updates = predictions.map(p => {
+          let points = 0
+          // Resultado exacto → 3 pts
+          if (p.predicted_home === homeScore && p.predicted_away === awayScore) {
+            points = 3
+          // Acertó ganador o empate → 1 pt
+          } else if (
+            (p.predicted_home > p.predicted_away && homeScore > awayScore) ||
+            (p.predicted_home < p.predicted_away && homeScore < awayScore) ||
+            (p.predicted_home === p.predicted_away && homeScore === awayScore)
+          ) {
+            points = 1
+          }
+          return { id: p.id, points }
+        })
+
+        // Actualizar cada predicción con sus puntos
+        await Promise.all(
+          updates.map(({ id, points }) =>
+            supabase
+              .from('predictions')
+              .update({ points })
+              .eq('id', id)
+          )
+        )
+      }
     }
 
     setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, saved: true } }))
@@ -203,7 +243,7 @@ export default function AdminMatchList({ matches }: Props) {
                       : 'bg-slate-900 text-white hover:bg-slate-700'
                   }`}
                 >
-                  {row.saving ? '...' : row.saved ? 'Guardado' : 'Guardar'}
+                  {row.saving ? '...' : row.saved ? '✓ Guardado' : 'Guardar'}
                 </button>
               </div>
 

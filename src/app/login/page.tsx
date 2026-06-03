@@ -24,8 +24,8 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-3">
             <img
-              src="/images/vpc-logo.png"
-              alt="VPC Logo"
+              src="/images/virgenConcepcion.png"
+              alt="Virgen de la Concepción"
               className="h-16 w-auto object-contain"
             />
           </div>

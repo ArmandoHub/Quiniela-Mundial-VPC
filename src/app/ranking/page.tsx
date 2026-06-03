@@ -54,7 +54,7 @@ const finishedHistory = (history ?? []).filter(p => p.matches !== null)
         <RankingList
           leaderboard={leaderboard ?? []}
           currentUserId={user.id}
-          history={finishedHistory}
+          history={finishedHistory as any}
         />
       </main>
     </div>

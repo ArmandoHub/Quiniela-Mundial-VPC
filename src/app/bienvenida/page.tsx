@@ -101,7 +101,7 @@ export default async function BienvenidaPage() {
               sin contar tiempo extra ni penales.
             </p>
             <p className="text-sm text-amber-900">
-              Si no ingresas una predicción antes del partido, obtienes 0 puntos automáticamente.
+              Si no ingresas una predicción antes del partido, por defecto se quedara el marcador 0 - 0.
             </p>
           </div>
         </div>

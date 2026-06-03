@@ -2,13 +2,14 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import NavMenu from '@/components/NavMenu'
+import RankingList from '@/components/RankingList'
+
+export const revalidate = 0
 
 export default async function RankingPage() {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
@@ -17,12 +18,27 @@ export default async function RankingPage() {
     .select('*')
     .limit(100)
 
-  const handleLogout = async () => {
-    'use server'
-    const supabase = await createClient()
-    await supabase.auth.signOut()
-    redirect('/login')
-  }
+  // Historial de predicciones del usuario actual
+  const { data: history } = await supabase
+    .from('predictions')
+    .select(`
+      id,
+      predicted_home,
+      predicted_away,
+      points,
+      matches (
+        home_team,
+        away_team,
+        home_score,
+        away_score,
+        match_time,
+        is_finished
+      )
+    `)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  const finishedHistory = (history ?? []).filter(p => p.matches?.is_finished)
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -34,48 +50,11 @@ export default async function RankingPage() {
       </nav>
 
       <main className="max-w-2xl mx-auto px-4 py-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>🥇 Ranking Global</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {(leaderboard ?? []).map((entry, idx) => {
-                const isMe = entry.user_id === user.id
-                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`
-                
-                return (
-                  <div
-                    key={entry.user_id}
-                    className={`flex items-center gap-3 p-3 rounded-lg ${
-                      isMe ? 'bg-blue-50 border border-blue-200' : 'bg-white border'
-                    }`}
-                  >
-                    <span className="w-8 text-center font-bold">{medal}</span>
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        {entry.display_name}
-                        {isMe && <span className="text-xs text-blue-500 ml-1">(tú)</span>}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {entry.exact_results} exactos · {entry.correct_winner} ganadores
-                      </p>
-                    </div>
-                    <Badge className="text-base px-3 py-1">
-                      {entry.total_points} pts
-                    </Badge>
-                  </div>
-                )
-              })}
-
-              {(!leaderboard || leaderboard.length === 0) && (
-                <p className="text-center text-muted-foreground py-8">
-                  Aún no hay predicciones. ¡Sé el primero!
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <RankingList
+          leaderboard={leaderboard ?? []}
+          currentUserId={user.id}
+          history={finishedHistory}
+        />
       </main>
     </div>
   )

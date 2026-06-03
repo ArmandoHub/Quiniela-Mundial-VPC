@@ -57,13 +57,57 @@ function groupByDate(matches: Match[]): Record<string, Match[]> {
   }, {} as Record<string, Match[]>)
 }
 
-export default function MatchesByStatus({ matches, predictionMap, userId }: Props) {
-  const [finishedOpen, setFinishedOpen] = useState(false)
+interface SectionHeaderProps {
+  color: string
+  dotClass: string
+  label: string
+  count: number
+  isOpen: boolean
+  onToggle: () => void
+  live?: boolean
+}
 
+function SectionHeader({ color, dotClass, label, count, isOpen, onToggle, live }: SectionHeaderProps) {
+  return (
+    <button
+      onClick={onToggle}
+      className="w-full flex items-center gap-2 mb-3"
+    >
+      {live ? (
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+        </span>
+      ) : (
+        <div className={`h-2.5 w-2.5 rounded-full ${dotClass}`}></div>
+      )}
+      <h2 className={`font-bold text-sm uppercase tracking-wide ${color}`}>{label}</h2>
+      <span className={`text-xs rounded-full px-2 py-0.5 font-medium border ${
+        live ? 'bg-red-100 text-red-600 border-red-200' :
+        label === 'PRÓXIMOS' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+        'bg-slate-100 text-slate-500 border-slate-200'
+      }`}>
+        {count}
+      </span>
+      <svg
+        className={`w-4 h-4 text-slate-400 ml-auto transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+  )
+}
+
+export default function MatchesByStatus({ matches, predictionMap, userId }: Props) {
   const safeMatches = matches ?? []
   const live = safeMatches.filter(m => getStatus(m) === 'live')
   const upcoming = safeMatches.filter(m => getStatus(m) === 'upcoming')
   const finished = safeMatches.filter(m => getStatus(m) === 'finished')
+
+  const [liveOpen, setLiveOpen] = useState(true)
+  const [upcomingOpen, setUpcomingOpen] = useState(true)   // abierto por defecto
+  const [finishedOpen, setFinishedOpen] = useState(false)  // cerrado por defecto
 
   const upcomingByDate = groupByDate(upcoming)
   const finishedByDate = groupByDate([...finished].reverse())
@@ -74,87 +118,82 @@ export default function MatchesByStatus({ matches, predictionMap, userId }: Prop
       {/* EN JUEGO */}
       {live.length > 0 && (
         <section>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-            </span>
-            <h2 className="font-bold text-sm text-red-600 uppercase tracking-wide">En juego</h2>
-            <span className="text-xs bg-red-100 text-red-600 border border-red-200 rounded-full px-2 py-0.5 font-medium">
-              {live.length}
-            </span>
-          </div>
-          <div className="space-y-3">
-            {live.map(match => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                prediction={predictionMap[match.id] ?? null}
-                userId={userId}
-              />
-            ))}
-          </div>
+          <SectionHeader
+            live
+            color="text-red-600"
+            dotClass="bg-red-500"
+            label="EN JUEGO"
+            count={live.length}
+            isOpen={liveOpen}
+            onToggle={() => setLiveOpen(prev => !prev)}
+          />
+          {liveOpen && (
+            <div className="space-y-3">
+              {live.map(match => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  prediction={predictionMap[match.id] ?? null}
+                  userId={userId}
+                />
+              ))}
+            </div>
+          )}
         </section>
       )}
 
       {/* PRÓXIMOS */}
       {upcoming.length > 0 && (
         <section>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="h-2.5 w-2.5 rounded-full bg-emerald-500"></div>
-            <h2 className="font-bold text-sm text-emerald-700 uppercase tracking-wide">Próximos</h2>
-            <span className="text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full px-2 py-0.5 font-medium">
-              {upcoming.length}
-            </span>
-          </div>
-          <div className="space-y-4">
-            {Object.entries(upcomingByDate).map(([date, dayMatches]) => (
-              <div key={date}>
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2 px-1">
-                  {date}
-                </p>
-                <div className="space-y-3">
-                  {dayMatches.map(match => (
-                    <div key={match.id} className="relative">
-                      <div className="absolute -top-2 right-3 z-10">
-                        <span className="text-[10px] font-semibold bg-emerald-600 text-white rounded-full px-2 py-0.5">
-                          {timeUntil(match.match_time)}
-                        </span>
+          <SectionHeader
+            color="text-emerald-700"
+            dotClass="bg-emerald-500"
+            label="PRÓXIMOS"
+            count={upcoming.length}
+            isOpen={upcomingOpen}
+            onToggle={() => setUpcomingOpen(prev => !prev)}
+          />
+          {upcomingOpen && (
+            <div className="space-y-4">
+              {Object.entries(upcomingByDate).map(([date, dayMatches]) => (
+                <div key={date}>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2 px-1">
+                    {date}
+                  </p>
+                  <div className="space-y-3">
+                    {dayMatches.map(match => (
+                      <div key={match.id} className="relative">
+                        <div className="absolute -top-2 right-3 z-10">
+                          <span className="text-[10px] font-semibold bg-emerald-600 text-white rounded-full px-2 py-0.5">
+                            {timeUntil(match.match_time)}
+                          </span>
+                        </div>
+                        <MatchCard
+                          match={match}
+                          prediction={predictionMap[match.id] ?? null}
+                          userId={userId}
+                        />
                       </div>
-                      <MatchCard
-                        match={match}
-                        prediction={predictionMap[match.id] ?? null}
-                        userId={userId}
-                      />
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
       {/* FINALIZADOS */}
       {finished.length > 0 && (
         <section>
-          <button
-            onClick={() => setFinishedOpen(prev => !prev)}
-            className="w-full flex items-center gap-2 mb-3 group"
-          >
-            <div className="h-2.5 w-2.5 rounded-full bg-slate-400"></div>
-            <h2 className="font-bold text-sm text-slate-500 uppercase tracking-wide">Finalizados</h2>
-            <span className="text-xs bg-slate-100 text-slate-500 border border-slate-200 rounded-full px-2 py-0.5 font-medium">
-              {finished.length}
-            </span>
-            <svg
-              className={`w-4 h-4 text-slate-400 ml-auto transition-transform duration-200 ${finishedOpen ? 'rotate-180' : ''}`}
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
+          <SectionHeader
+            color="text-slate-500"
+            dotClass="bg-slate-400"
+            label="FINALIZADOS"
+            count={finished.length}
+            isOpen={finishedOpen}
+            onToggle={() => setFinishedOpen(prev => !prev)}
+          />
           {finishedOpen && (
             <div className="space-y-4">
               {Object.entries(finishedByDate).map(([date, dayMatches]) => (

@@ -7,6 +7,69 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+const FLAGS: Record<string, string> = {
+  'Mexico': 'mx', 'México': 'mx',
+  'Sudafrica': 'za', 'Sudáfrica': 'za',
+  'Corea del Sur': 'kr',
+  'Chequia': 'cz',
+  'Canada': 'ca', 'Canadá': 'ca',
+  'Bosnia-Herzegovina': 'ba',
+  'Qatar': 'qa',
+  'Suiza': 'ch',
+  'Brasil': 'br',
+  'Marruecos': 'ma',
+  'Haiti': 'ht', 'Haití': 'ht',
+  'Escocia': 'gb-sct',
+  'EE.UU.': 'us',
+  'Paraguay': 'py',
+  'Australia': 'au',
+  'Turquia': 'tr', 'Turquía': 'tr',
+  'Alemania': 'de',
+  'Curazao': 'cw',
+  'Costa de Marfil': 'ci',
+  'Ecuador': 'ec',
+  'Paises Bajos': 'nl', 'Países Bajos': 'nl',
+  'Japon': 'jp', 'Japón': 'jp',
+  'Suecia': 'se',
+  'Tunez': 'tn', 'Túnez': 'tn',
+  'Belgica': 'be', 'Bélgica': 'be',
+  'Egipto': 'eg',
+  'Iran': 'ir', 'Irán': 'ir',
+  'Nueva Zelanda': 'nz',
+  'Espana': 'es', 'España': 'es',
+  'Cabo Verde': 'cv',
+  'Arabia Saudita': 'sa',
+  'Uruguay': 'uy',
+  'Francia': 'fr',
+  'Senegal': 'sn',
+  'Irak': 'iq',
+  'Noruega': 'no',
+  'Argentina': 'ar',
+  'Argelia': 'dz',
+  'Austria': 'at',
+  'Jordania': 'jo',
+  'Portugal': 'pt',
+  'RD Congo': 'cd',
+  'Uzbekistan': 'uz', 'Uzbekistán': 'uz',
+  'Colombia': 'co',
+  'Inglaterra': 'gb-eng',
+  'Croacia': 'hr',
+  'Ghana': 'gh',
+  'Panama': 'pa', 'Panamá': 'pa',
+}
+
+function Flag({ team }: { team: string }) {
+  const code = FLAGS[team]
+  if (!code) return null
+  return (
+    <img
+      src={`https://flagcdn.com/${code}.svg`}
+      alt={team}
+      className="h-4 w-6 object-cover rounded-sm border border-slate-200 shrink-0"
+    />
+  )
+}
+
 type Match = {
   id: string
   home_team: string
@@ -38,10 +101,6 @@ export default function MatchCard({ match, prediction, userId }: Props) {
   const [error, setError] = useState('')
 
   const matchTime = new Date(match.match_time)
-  // Codigo anterior, cambio echo AHUB 03062025 11:33
-  //const isLocked = new Date() >= matchTime
-
-  // Nuevo codigo, cambio echo AHUB 03062025 11:33
   const isLocked = new Date() >= new Date(matchTime.getTime() - 15 * 60 * 1000)
 
   const handleSave = async () => {
@@ -90,20 +149,22 @@ export default function MatchCard({ match, prediction, userId }: Props) {
           )}
         </div>
 
-        {/* Equipos y predicción */}
-        <div className="flex items-center gap-3">
-          <span className="flex-1 font-medium text-right">{match.home_team}</span>
-          
+        {/* Equipos */}
+        <div className="flex items-center gap-2">
+          {/* Local */}
+          <div className="flex-1 flex items-center justify-end gap-2">
+            <span className="font-medium text-right text-sm">{match.home_team}</span>
+            <Flag team={match.home_team} />
+          </div>
+
           {match.is_finished ? (
-            /* Resultado final */
-            <div className="flex items-center gap-1 text-lg font-bold">
+            <div className="flex items-center gap-1 text-lg font-bold shrink-0">
               <span className="w-8 text-center">{match.home_score}</span>
               <span className="text-muted-foreground">-</span>
               <span className="w-8 text-center">{match.away_score}</span>
             </div>
           ) : (
-            /* Inputs de predicción */
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               <Input
                 type="number"
                 min="0"
@@ -125,8 +186,12 @@ export default function MatchCard({ match, prediction, userId }: Props) {
               />
             </div>
           )}
-          
-          <span className="flex-1 font-medium">{match.away_team}</span>
+
+          {/* Visitante */}
+          <div className="flex-1 flex items-center gap-2">
+            <Flag team={match.away_team} />
+            <span className="font-medium text-sm">{match.away_team}</span>
+          </div>
         </div>
 
         {/* Tu predicción + puntos (si terminó) */}
@@ -135,11 +200,11 @@ export default function MatchCard({ match, prediction, userId }: Props) {
             <span className="text-muted-foreground">
               Tu predicción: <strong>{prediction.predicted_home} - {prediction.predicted_away}</strong>
             </span>
-              <Badge className={
-                prediction.points === 5 ? 'bg-green-500' :
-                prediction.points === 3 ? 'bg-yellow-500' : 'bg-gray-400'
-              }>
-              {prediction.points} pts
+            <Badge className={
+              prediction.points === 5 ? 'bg-green-500' :
+              prediction.points === 3 ? 'bg-yellow-500' : 'bg-gray-400'
+            }>
+              {prediction.points ?? 0} pts
             </Badge>
           </div>
         )}

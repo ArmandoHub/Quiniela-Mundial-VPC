@@ -19,26 +19,27 @@ export default async function RankingPage() {
     .limit(100)
 
   // Historial de predicciones del usuario actual
-  const { data: history } = await supabase
-    .from('predictions')
-    .select(`
-      id,
-      predicted_home,
-      predicted_away,
-      points,
-      matches (
-        home_team,
-        away_team,
-        home_score,
-        away_score,
-        match_time,
-        is_finished
-      )
-    `)
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+const { data: history } = await supabase
+  .from('predictions')
+  .select(`
+    id,
+    predicted_home,
+    predicted_away,
+    points,
+    matches (
+      home_team,
+      away_team,
+      home_score,
+      away_score,
+      match_time,
+      is_finished
+    )
+  `)
+  .eq('user_id', user.id)
+  .eq('matches.is_finished', true)
+  .order('created_at', { ascending: false })
 
-  const finishedHistory = (history ?? []).filter(p => p.matches?.is_finished)
+const finishedHistory = (history ?? []).filter(p => p.matches !== null)
 
   return (
     <div className="min-h-screen bg-slate-50">

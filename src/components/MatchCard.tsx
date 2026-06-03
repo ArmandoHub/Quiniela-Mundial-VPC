@@ -38,7 +38,11 @@ export default function MatchCard({ match, prediction, userId }: Props) {
   const [error, setError] = useState('')
 
   const matchTime = new Date(match.match_time)
-  const isLocked = new Date() >= matchTime
+  // Codigo anterior, cambio echo AHUB 03062025 11:33
+  //const isLocked = new Date() >= matchTime
+
+  // Nuevo codigo, cambio echo AHUB 03062025 11:33
+  const isLocked = new Date() >= new Date(matchTime.getTime() - 15 * 60 * 1000)
 
   const handleSave = async () => {
     if (home === '' || away === '') return

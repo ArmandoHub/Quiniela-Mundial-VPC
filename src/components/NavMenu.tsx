@@ -58,7 +58,7 @@ export default function NavMenu() {
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
             >
-              Partidos
+              Pronosticos
             </Link>
             <Link
               href="/ranking"
@@ -72,14 +72,14 @@ export default function NavMenu() {
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
             >
-              Estadisticas
+              Grupos
             </Link>
             <Link
               href="/grupos"
               onClick={() => setOpen(false)}
               className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
             >
-              Fase de grupos
+              Partidos
             </Link>
             <div className="my-1 h-px bg-slate-100" />
             <button

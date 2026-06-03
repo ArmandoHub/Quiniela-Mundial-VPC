@@ -5,8 +5,8 @@ import NavMenu from '@/components/NavMenu'
 
 export default async function BienvenidaPage() {
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
+
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
@@ -38,10 +38,10 @@ export default async function BienvenidaPage() {
             />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">
-            Bienvenido, {displayName}!
+            ¡Bienvenido, {displayName}!
           </h1>
           <p className="text-slate-500 mt-1 text-sm">
-            Ya estas listo para participar en la Quiniela Mundial 2026
+            Ya estás listo para participar en la Quiniela Mundial 2026.
           </p>
           <Link href="/partidos" className="inline-block mt-4">
             <button className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-slate-700 transition-colors">
@@ -50,46 +50,46 @@ export default async function BienvenidaPage() {
           </Link>
         </div>
 
-        {/* Proposito */}
+        {/* Propósito */}
         <div className="bg-white rounded-2xl border p-5 shadow-sm space-y-3">
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            Proposito de la Quiniela
+            Propósito de la Quiniela
           </h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             Esta quiniela nace como una forma de unirnos y disfrutar juntos el Mundial 2026.
-            Mas alla de la competencia, queremos que sea una excusa para compartir, animarnos
-            y vivir el futbol en comunidad.
+            Más allá de la competencia, queremos que sea una excusa para compartir, animarnos
+            y vivir el fútbol en comunidad.
           </p>
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
             <p className="text-sm text-blue-800 leading-relaxed">
-              Una parte de lo recaudado sera destinada al
-              <strong> Comite de la Virgen de Concepcion</strong>, como un aporte
+              Una parte de lo recaudado será destinada al
+              <strong> Comité de la Virgen de Concepción</strong>, como un aporte
               de nuestra comunidad a esta causa tan importante. Gracias por participar
-              y contribuir con algo mas grande.
+              y contribuir con algo más grande.
             </p>
           </div>
         </div>
 
-        {/* Puntuacion */}
+        {/* Puntuación */}
         <div className="bg-white rounded-2xl border p-5 shadow-sm space-y-4">
           <h2 className="text-base font-bold text-slate-800">
-            Como se acumulan los puntos
+            Cómo se acumulan los puntos
           </h2>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
               <div className="text-3xl font-black text-emerald-500">3</div>
               <div className="font-semibold text-slate-800 text-sm mt-1">Resultado exacto</div>
-              <div className="text-xs text-slate-500 mt-1">Aciertas el marcador preciso, ej. 2-1</div>
+              <div className="text-xs text-slate-500 mt-1">Aciertas el marcador preciso, ej. 2-1.</div>
             </div>
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
               <div className="text-3xl font-black text-blue-500">1</div>
               <div className="font-semibold text-slate-800 text-sm mt-1">Ganador correcto</div>
-              <div className="text-xs text-slate-500 mt-1">Aciertas quien gana o si hay empate</div>
+              <div className="text-xs text-slate-500 mt-1">Aciertas quién gana o si hay empate.</div>
             </div>
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
               <div className="text-3xl font-black text-slate-300">0</div>
               <div className="font-semibold text-slate-800 text-sm mt-1">Fallo</div>
-              <div className="text-xs text-slate-500 mt-1">No aciertas el resultado ni el ganador</div>
+              <div className="text-xs text-slate-500 mt-1">No aciertas el resultado ni el ganador.</div>
             </div>
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
@@ -101,42 +101,42 @@ export default async function BienvenidaPage() {
               sin contar tiempo extra ni penales.
             </p>
             <p className="text-sm text-amber-900">
-              Si no ingresas una prediccion antes del partido, obtienes 0 puntos automaticamente.
+              Si no ingresas una predicción antes del partido, obtienes 0 puntos automáticamente.
             </p>
           </div>
         </div>
 
-        {/* Como funcionan las apuestas */}
+        {/* Cómo funcionan las apuestas */}
         <div className="bg-white rounded-2xl border p-5 shadow-sm space-y-4">
           <h2 className="text-base font-bold text-slate-800">
-            Como funcionan las apuestas
+            Cómo funcionan las apuestas
           </h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             Puedes ingresar tus predicciones desde ya para todos los partidos disponibles.
-            Solo tienes que ir a la pagina de Partidos, elegir el marcador que crees que
+            Solo tienes que ir a la página de Partidos, elegir el marcador que crees que
             va a quedar y guardar tu apuesta.
           </p>
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2">
             <p className="text-xs font-bold text-red-700 uppercase tracking-wide">
-              Atencion
+              Atención
             </p>
             <p className="text-sm text-red-800 leading-relaxed">
               Las apuestas se cierran <strong>15 minutos antes</strong> de que inicie cada partido.
-              Una vez cerradas, ya no podras modificar ni ingresar tu prediccion para ese partido.
-              No te quedes sin apostar!
+              Una vez cerradas, ya no podrás modificar ni ingresar tu predicción para ese partido.
+              ¡No te quedes sin apostar!
             </p>
           </div>
           <p className="text-sm text-slate-500">
             Puedes editar tus predicciones cuantas veces quieras antes del cierre.
-            Te recomendamos revisar tus apuestas el dia del partido para asegurarte
-            de que todo este como quieres.
+            Te recomendamos revisar tus apuestas el día del partido para asegurarte
+            de que todo esté como quieres.
           </p>
         </div>
 
-        {/* Guia de paginas */}
+        {/* Guía de páginas */}
         <div className="bg-white rounded-2xl border p-5 shadow-sm space-y-3">
           <h2 className="text-base font-bold text-slate-800">
-            Que hay en cada seccion
+            Qué hay en cada sección
           </h2>
           <div className="space-y-2">
             <Link href="/partidos" className="block">
@@ -147,8 +147,8 @@ export default async function BienvenidaPage() {
                 <div>
                   <p className="font-semibold text-slate-800 text-sm">Partidos</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Aqui ingresas tus predicciones. Una vez que el partido termina,
-                    veras el resultado real y cuantos puntos ganaste.
+                    Aquí ingresas tus predicciones. Una vez que el partido termina,
+                    verás el resultado real y cuántos puntos ganaste.
                   </p>
                 </div>
               </div>
@@ -163,7 +163,7 @@ export default async function BienvenidaPage() {
                   <p className="font-semibold text-slate-800 text-sm">Ranking</p>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Tabla de posiciones con todos los participantes ordenados por puntos.
-                    Mira donde estas tu y quien va liderando.
+                    Mira dónde estás tú y quién va liderando.
                   </p>
                 </div>
               </div>
@@ -175,7 +175,7 @@ export default async function BienvenidaPage() {
                   E
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800 text-sm">Estadisticas</p>
+                  <p className="font-semibold text-slate-800 text-sm">Estadísticas</p>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Posiciones de cada grupo del Mundial con puntos, goles a favor,
                     goles en contra y diferencia de goles.
@@ -202,10 +202,13 @@ export default async function BienvenidaPage() {
         </div>
 
         <p className="text-center text-xs text-slate-400 pb-4">
-          Quiniela VPC · Mundial 2026 · Mucha suerte!
+          Quiniela VPC · Mundial 2026 · ¡Mucha suerte!
         </p>
 
       </main>
     </div>
   )
 }
+
+
+    

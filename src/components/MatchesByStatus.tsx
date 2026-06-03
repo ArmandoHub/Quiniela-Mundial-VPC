@@ -60,9 +60,10 @@ function groupByDate(matches: Match[]): Record<string, Match[]> {
 export default function MatchesByStatus({ matches, predictionMap, userId }: Props) {
   const [finishedOpen, setFinishedOpen] = useState(false)
 
-  const live = matches.filter(m => getStatus(m) === 'live')
-  const upcoming = matches.filter(m => getStatus(m) === 'upcoming')
-  const finished = matches.filter(m => getStatus(m) === 'finished')
+  const safeMatches = matches ?? []
+  const live = safeMatches.filter(m => getStatus(m) === 'live')
+  const upcoming = safeMatches.filter(m => getStatus(m) === 'upcoming')
+  const finished = safeMatches.filter(m => getStatus(m) === 'finished')
 
   const upcomingByDate = groupByDate(upcoming)
   const finishedByDate = groupByDate([...finished].reverse())
@@ -115,7 +116,6 @@ export default function MatchesByStatus({ matches, predictionMap, userId }: Prop
                 <div className="space-y-3">
                   {dayMatches.map(match => (
                     <div key={match.id} className="relative">
-                      {/* Badge de tiempo restante */}
                       <div className="absolute -top-2 right-3 z-10">
                         <span className="text-[10px] font-semibold bg-emerald-600 text-white rounded-full px-2 py-0.5">
                           {timeUntil(match.match_time)}
@@ -179,7 +179,7 @@ export default function MatchesByStatus({ matches, predictionMap, userId }: Prop
         </section>
       )}
 
-      {matches.length === 0 && (
+      {safeMatches.length === 0 && (
         <p className="text-center text-slate-400 py-12 text-sm">No hay partidos disponibles.</p>
       )}
     </div>

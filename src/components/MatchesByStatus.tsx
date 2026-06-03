@@ -163,7 +163,7 @@ export default function MatchesByStatus({ matches, predictionMap, userId }: Prop
                   <div className="space-y-3">
                     {dayMatches.map(match => (
                       <div key={match.id} className="relative">
-                        <div className="absolute -top-2 right-3 z-10">
+                        <div className="absolute -top-2 right-3 z-0">
                           <span className="text-[10px] font-semibold bg-emerald-600 text-white rounded-full px-2 py-0.5">
                             {timeUntil(match.match_time)}
                           </span>

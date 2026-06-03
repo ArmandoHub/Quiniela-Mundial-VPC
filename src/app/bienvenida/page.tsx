@@ -32,8 +32,8 @@ export default async function BienvenidaPage() {
         <div className="bg-white rounded-2xl border p-6 text-center shadow-sm">
           <div className="flex justify-center mb-4">
             <img
-              src="/images/vpc-logo.png"
-              alt="VPC Logo"
+              src="/images/virgenConcepcion.png"
+              alt="Virgen de concepción"
               className="h-14 w-auto object-contain"
             />
           </div>

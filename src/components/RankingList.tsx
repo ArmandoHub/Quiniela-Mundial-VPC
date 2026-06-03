@@ -107,13 +107,13 @@ export default function RankingList({ leaderboard, currentUserId, history }: Pro
                         })
 
                         const pointColor =
-                          p.points === 3 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
-                          p.points === 1 ? 'bg-amber-100 text-amber-700 border-amber-200' :
+                          p.points === 5 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
+                          p.points === 3 ? 'bg-amber-100 text-amber-700 border-amber-200' :
                           'bg-slate-100 text-slate-500 border-slate-200'
 
                         const pointLabel =
-                          p.points === 3 ? '✓ Exacto' :
-                          p.points === 1 ? '~ Ganador' :
+                          p.points === 5 ? '✓ Exacto' :
+                          p.points === 3 ? '~ Ganador' :
                           '✗ Fallo'
 
                         return (

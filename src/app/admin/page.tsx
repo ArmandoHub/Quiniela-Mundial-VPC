@@ -3,17 +3,19 @@ import { redirect } from 'next/navigation'
 import NavMenu from '@/components/NavMenu'
 import AdminMatchList from '@/components/AdminMatchList'
 
-const ADMIN_EMAIL = 'josehubb22@gmail.com'
-//Dickson.luna17@gmail.com 
-//Ulisessolis94@gmail.com
-//caperezpastor@gmail.com
+const ADMIN_EMAILS = [
+  'josehubb22@gmail.com',
+  'dickson.luna17@gmail.com',
+  'caperezpastor@gmail.com',
+  'ulisessolis94@gmail.com',
+]
 
 export default async function AdminPage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
-  if (user.email !== ADMIN_EMAIL) redirect('/partidos')
+  if (!ADMIN_EMAILS.includes(user.email ?? '')) redirect('/partidos')
 
   const { data: matches } = await supabase
     .from('matches')

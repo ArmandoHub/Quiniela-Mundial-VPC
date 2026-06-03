@@ -53,69 +53,51 @@ export default function AdminMatchList({ matches }: Props) {
     }))
   }
 
-const save = async (match: Match) => {
-  const row = rows[match.id]
-  const homeScore = parseInt(row.home_score)
-  const awayScore = parseInt(row.away_score)
+  const save = async (match: Match) => {
+    const row = rows[match.id]
+    const homeScore = parseInt(row.home_score)
+    const awayScore = parseInt(row.away_score)
 
-  console.log('=== GUARDANDO ===', match.home_team, 'vs', match.away_team)
-  console.log('is_finished:', row.is_finished)
-  console.log('scores:', homeScore, '-', awayScore)
+    if (isNaN(homeScore) || isNaN(awayScore)) {
+      setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], error: 'Ingresa ambos marcadores.' } }))
+      return
+    }
 
-  if (isNaN(homeScore) || isNaN(awayScore)) {
-    setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], error: 'Ingresa ambos marcadores.' } }))
-    return
-  }
+    setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: true, error: '' } }))
 
-  setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: true, error: '' } }))
+    const supabase = createClient()
 
-  const supabase = createClient()
+    // 1. Guardar resultado en matches
+    const { error: updateError } = await supabase
+      .from('matches')
+      .update({
+        home_score: homeScore,
+        away_score: awayScore,
+        is_finished: row.is_finished,
+      })
+      .eq('id', match.id)
 
-  const { error: updateError } = await supabase
-    .from('matches')
-    .update({ home_score: homeScore, away_score: awayScore, is_finished: row.is_finished })
-    .eq('id', match.id)
+    if (updateError) {
+      setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, error: 'Error al guardar.' } }))
+      return
+    }
 
-  console.log('Match update error:', updateError)
+    // 2. Si está finalizado, recalcular puntos via RPC (SECURITY DEFINER bypasea RLS)
+    if (row.is_finished) {
+      const { error: rpcError } = await supabase.rpc('update_prediction_points', {
+        p_match_id: match.id,
+        p_home_score: homeScore,
+        p_away_score: awayScore,
+      })
 
-  if (updateError) {
-    setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, error: 'Error al guardar.' } }))
-    return
-  }
-
-  if (row.is_finished) {
-    console.log('Buscando predicciones para match:', match.id)
-    const { data: predictions, error: predError } = await supabase
-      .from('predictions')
-      .select('id, predicted_home, predicted_away')
-      .eq('match_id', match.id)
-
-    console.log('Predicciones encontradas:', predictions?.length, 'Error:', predError)
-
-    if (predictions && predictions.length > 0) {
-      for (const p of predictions) {
-        let points = 0
-        if (p.predicted_home === homeScore && p.predicted_away === awayScore) {
-          points = 3
-        } else if (
-          (p.predicted_home > p.predicted_away && homeScore > awayScore) ||
-          (p.predicted_home < p.predicted_away && homeScore < awayScore) ||
-          (p.predicted_home === p.predicted_away && homeScore === awayScore)
-        ) {
-          points = 1
-        }
-        console.log(`Prediccion ${p.predicted_home}-${p.predicted_away} = ${points} pts`)
-        const { error: pointsError } = await supabase
-          .from('predictions')
-          .update({ points })
-          .eq('id', p.id)
-        console.log('Points update error:', pointsError)
+      if (rpcError) {
+        setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, error: 'Error al calcular puntos.' } }))
+        return
       }
     }
-  }
 
-  setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, saved: true } }))
-}
+    setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, saved: true } }))
+  }
 
   const filteredMatches = matches.filter(m => {
     const row = rows[m.id]

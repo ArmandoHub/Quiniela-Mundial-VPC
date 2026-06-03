@@ -135,10 +135,10 @@ export default function MatchCard({ match, prediction, userId }: Props) {
             <span className="text-muted-foreground">
               Tu predicción: <strong>{prediction.predicted_home} - {prediction.predicted_away}</strong>
             </span>
-            <Badge className={
-              prediction.points === 3 ? 'bg-green-500' :
-              prediction.points === 1 ? 'bg-yellow-500' : 'bg-gray-400'
-            }>
+              <Badge className={
+                prediction.points === 5 ? 'bg-green-500' :
+                prediction.points === 3 ? 'bg-yellow-500' : 'bg-gray-400'
+              }>
               {prediction.points} pts
             </Badge>
           </div>

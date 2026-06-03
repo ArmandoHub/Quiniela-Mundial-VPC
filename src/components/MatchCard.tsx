@@ -94,8 +94,8 @@ interface Props {
 }
 
 export default function MatchCard({ match, prediction, userId }: Props) {
-  const [home, setHome] = useState(prediction?.predicted_home?.toString() ?? '')
-  const [away, setAway] = useState(prediction?.predicted_away?.toString() ?? '')
+  const [home, setHome] = useState(prediction?.predicted_home?.toString() ?? '0')
+  const [away, setAway] = useState(prediction?.predicted_away?.toString() ?? '0')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -217,7 +217,7 @@ export default function MatchCard({ match, prediction, userId }: Props) {
               size="sm"
               className="w-full"
               onClick={handleSave}
-              disabled={saving || home === '' || away === ''}
+              disabled={saving}
               variant={saved ? 'secondary' : 'default'}
             >
               {saved ? '✓ Guardado' : saving ? 'Guardando...' : 'Guardar predicción'}

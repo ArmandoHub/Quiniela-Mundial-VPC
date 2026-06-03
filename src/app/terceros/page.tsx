@@ -158,7 +158,7 @@ export default async function TercerosPage() {
 
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-slate-900">Estadisticas</h1>
+          <h1 className="text-xl font-bold text-slate-900">Grupos</h1>
           <p className="text-xs text-slate-500 mt-0.5">
             Los 8 mejores terceros lugares clasifican a eliminatoria
           </p>

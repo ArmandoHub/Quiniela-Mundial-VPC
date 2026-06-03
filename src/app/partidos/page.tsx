@@ -1,16 +1,24 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import MatchCard from '@/components/MatchCard'
-import Link from 'next/link'
+import MatchesAccordion from '@/components/MatchesAccordion'
 import NavMenu from '@/components/NavMenu'
 
-export const revalidate = 0   // ← agrega esta línea aquí
+export const revalidate = 0
 
 export default async function PartidosPage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  // Cargar alias
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('display_name')
+    .eq('id', user.id)
+    .single()
+
+  const displayName = profile?.display_name ?? user.email
 
   const { data: matches } = await supabase
     .from('matches')
@@ -37,21 +45,17 @@ export default async function PartidosPage() {
       </nav>
 
       <main className="max-w-2xl mx-auto px-4 py-6">
-        <div className="mb-4">
+        <div className="mb-5">
           <p className="text-sm text-muted-foreground">
-            Bienvenido <strong>{user.email}</strong>
+            Bienvenido <strong>{displayName}</strong>
           </p>
         </div>
-        <div className="space-y-3">
-          {(matches ?? []).map((match) => (
-            <MatchCard
-              key={match.id}
-              match={match}
-              prediction={predictionMap[match.id] ?? null}
-              userId={user.id}
-            />
-          ))}
-        </div>
+
+        <MatchesAccordion
+          matches={matches ?? []}
+          predictionMap={predictionMap}
+          userId={user.id}
+        />
       </main>
     </div>
   )

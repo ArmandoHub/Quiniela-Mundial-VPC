@@ -336,10 +336,10 @@ export default function GruposPage() {
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 py-4 space-y-3">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">📋</span>
+            <span className="text-2xl"></span>
             <div>
               <h1 className="text-xl font-bold text-slate-900">
-                Grupos — Mundial 2026
+                Partidos
               </h1>
               <p className="text-xs text-slate-500">
                 Horarios en hora de Guatemala (CT)

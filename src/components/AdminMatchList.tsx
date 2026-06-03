@@ -54,74 +54,71 @@ export default function AdminMatchList({ matches }: Props) {
   }
 
   const save = async (match: Match) => {
-    const row = rows[match.id]
-    const homeScore = parseInt(row.home_score)
-    const awayScore = parseInt(row.away_score)
+  const row = rows[match.id]
+  const homeScore = parseInt(row.home_score)
+  const awayScore = parseInt(row.away_score)
 
-    if (isNaN(homeScore) || isNaN(awayScore)) {
-      setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], error: 'Ingresa ambos marcadores.' } }))
-      return
-    }
-
-    setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: true, error: '' } }))
-
-    const supabase = createClient()
-
-    // 1. Guardar resultado en matches
-    const { error: updateError } = await supabase
-      .from('matches')
-      .update({
-        home_score: homeScore,
-        away_score: awayScore,
-        is_finished: row.is_finished,
-      })
-      .eq('id', match.id)
-
-    if (updateError) {
-      setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, error: 'Error al guardar.' } }))
-      return
-    }
-
-    // 2. Si está finalizado, recalcular puntos directamente desde el cliente
-    // Esto es más confiable que depender solo del trigger
-    if (row.is_finished) {
-      const { data: predictions } = await supabase
-        .from('predictions')
-        .select('id, predicted_home, predicted_away')
-        .eq('match_id', match.id)
-
-      if (predictions && predictions.length > 0) {
-        // Calcular puntos para cada predicción
-        const updates = predictions.map(p => {
-          let points = 0
-          // Resultado exacto → 3 pts
-          if (p.predicted_home === homeScore && p.predicted_away === awayScore) {
-            points = 3
-          // Acertó ganador o empate → 1 pt
-          } else if (
-            (p.predicted_home > p.predicted_away && homeScore > awayScore) ||
-            (p.predicted_home < p.predicted_away && homeScore < awayScore) ||
-            (p.predicted_home === p.predicted_away && homeScore === awayScore)
-          ) {
-            points = 1
-          }
-          return { id: p.id, points }
-        })
-
-        // Actualizar cada predicción con sus puntos
-        await Promise.all(
-          updates.map(({ id, points }) =>
-            supabase
-              .from('predictions')
-              .update({ points })
-              .eq('id', id)
-          )
-        )
-      }
-    }
-
-    setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, saved: true } }))
+  if (isNaN(homeScore) || isNaN(awayScore)) {
+    setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], error: 'Ingresa ambos marcadores.' } }))
+    return
   }
+
+  setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: true, error: '' } }))
+
+  const supabase = createClient()
+
+  const { error: updateError } = await supabase
+    .from('matches')
+    .update({
+      home_score: homeScore,
+      away_score: awayScore,
+      is_finished: row.is_finished,
+    })
+    .eq('id', match.id)
+
+  if (updateError) {
+    console.error('Error updating match:', updateError)
+    setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, error: 'Error al guardar.' } }))
+    return
+  }
+
+  console.log('Match saved. is_finished:', row.is_finished)
+
+  if (row.is_finished) {
+    const { data: predictions, error: predError } = await supabase
+      .from('predictions')
+      .select('id, predicted_home, predicted_away')
+      .eq('match_id', match.id)
+
+    console.log('Predictions found:', predictions?.length, predError)
+
+    if (predictions && predictions.length > 0) {
+      const updates = predictions.map(p => {
+        let points = 0
+        if (p.predicted_home === homeScore && p.predicted_away === awayScore) {
+          points = 3
+        } else if (
+          (p.predicted_home > p.predicted_away && homeScore > awayScore) ||
+          (p.predicted_home < p.predicted_away && homeScore < awayScore) ||
+          (p.predicted_home === p.predicted_away && homeScore === awayScore)
+        ) {
+          points = 1
+        }
+        console.log(`Prediction ${p.id}: ${p.predicted_home}-${p.predicted_away} vs ${homeScore}-${awayScore} = ${points} pts`)
+        return { id: p.id, points }
+      })
+
+      const results = await Promise.all(
+        updates.map(({ id, points }) =>
+          supabase.from('predictions').update({ points }).eq('id', id)
+        )
+      )
+      console.log('Update results:', results.map(r => r.error ?? 'ok'))
+    }
+  }
+
+  setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, saved: true } }))
+}
 
   const filteredMatches = matches.filter(m => {
     const row = rows[m.id]

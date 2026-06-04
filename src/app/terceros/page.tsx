@@ -25,14 +25,14 @@ const FLAGS: Record<string, string> = {
   'Corea del Sur': 'kr',
   'Chequia': 'cz',
   'Canada': 'ca', 'Canadá': 'ca',
-  'Bosnia-Herzegovina': 'ba',
-  'Qatar': 'qa',
+  'Bosnia-Herzegovina': 'ba', 'Bosnia y Herzegovina': 'ba',
+  'Qatar': 'qa', 'Catar': 'qa',
   'Suiza': 'ch',
   'Brasil': 'br',
   'Marruecos': 'ma',
   'Haiti': 'ht', 'Haití': 'ht',
   'Escocia': 'gb-sct',
-  'EE.UU.': 'us',
+  'EE.UU.': 'us', 'Estados Unidos': 'us',
   'Paraguay': 'py',
   'Australia': 'au',
   'Turquia': 'tr', 'Turquía': 'tr',
@@ -50,7 +50,7 @@ const FLAGS: Record<string, string> = {
   'Nueva Zelanda': 'nz',
   'Espana': 'es', 'España': 'es',
   'Cabo Verde': 'cv',
-  'Arabia Saudita': 'sa',
+  'Arabia Saudita': 'sa', 'Arabia Saudí': 'sa',
   'Uruguay': 'uy',
   'Francia': 'fr',
   'Senegal': 'sn',
@@ -77,7 +77,7 @@ interface Match {
   home_score: number | null
   away_score: number | null
   is_finished: boolean
-  group_name: string
+  stage: string
 }
 
 interface TeamStats {
@@ -92,7 +92,10 @@ function calcularGrupos(matches: Match[]): Record<string, TeamStats[]> {
   const grupos: Record<string, Record<string, TeamStats>> = {}
 
   for (const m of matches) {
-    const g = m.group_name
+    // stage es "Grupo A", "Grupo B", etc. → extraemos solo la letra
+    const g = m.stage.replace('Grupo ', '').trim()
+    if (!g || g.length > 1) continue // ignorar eliminatorias
+
     if (!grupos[g]) grupos[g] = {}
 
     for (const team of [m.home_team, m.away_team]) {
@@ -142,9 +145,8 @@ export default async function TercerosPage() {
 
   const { data: matches } = await supabase
     .from('matches')
-    .select('id, home_team, away_team, home_score, away_score, is_finished, group_name')
+    .select('id, home_team, away_team, home_score, away_score, is_finished, stage')
     .ilike('stage', 'Grupo%')
-    //.eq('stage', 'group') TODO: se cambio porque daba error AHUB 04062025
 
   const grupos = calcularGrupos(matches ?? [])
 

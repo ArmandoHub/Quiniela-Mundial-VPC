@@ -143,7 +143,8 @@ export default async function TercerosPage() {
   const { data: matches } = await supabase
     .from('matches')
     .select('id, home_team, away_team, home_score, away_score, is_finished, group_name')
-    .eq('stage', 'group')
+    .ilike('stage', 'Grupo%')
+    //.eq('stage', 'group') TODO: se cambio porque daba error AHUB 04062025
 
   const grupos = calcularGrupos(matches ?? [])
 

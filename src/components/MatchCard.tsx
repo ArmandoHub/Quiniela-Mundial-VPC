@@ -97,14 +97,15 @@ export default function MatchCard({ match, prediction, userId }: Props) {
   const [home, setHome] = useState(prediction?.predicted_home?.toString() ?? '0')
   const [away, setAway] = useState(prediction?.predicted_away?.toString() ?? '0')
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  // ✅ hasSaved arranca en true si ya tiene predicción guardada
+  const [hasSaved, setHasSaved] = useState(prediction !== null)
+  const [isEditing, setIsEditing] = useState(false)
   const [error, setError] = useState('')
 
   const matchTime = new Date(match.match_time)
   const isLocked = new Date() >= new Date(matchTime.getTime() - 15 * 60 * 1000)
 
   const handleSave = async () => {
-    if (home === '' || away === '') return
     setSaving(true)
     setError('')
 
@@ -124,11 +125,15 @@ export default function MatchCard({ match, prediction, userId }: Props) {
     if (error) {
       setError('No se pudo guardar. ¿Ya comenzó el partido?')
     } else {
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
+      // ✅ Marcar como guardado y salir del modo edición
+      setHasSaved(true)
+      setIsEditing(false)
     }
     setSaving(false)
   }
+
+  // Mostrar predicción guardada (no en modo edición)
+  const showSaved = hasSaved && !isEditing
 
   return (
     <Card className={`${isLocked ? 'opacity-75' : ''}`}>
@@ -171,7 +176,7 @@ export default function MatchCard({ match, prediction, userId }: Props) {
                 max="20"
                 value={home}
                 onChange={(e) => setHome(e.target.value)}
-                disabled={isLocked}
+                disabled={isLocked || showSaved}
                 className="w-12 text-center p-1 h-9"
               />
               <span className="text-muted-foreground font-bold">-</span>
@@ -181,7 +186,7 @@ export default function MatchCard({ match, prediction, userId }: Props) {
                 max="20"
                 value={away}
                 onChange={(e) => setAway(e.target.value)}
-                disabled={isLocked}
+                disabled={isLocked || showSaved}
                 className="w-12 text-center p-1 h-9"
               />
             </div>
@@ -209,19 +214,54 @@ export default function MatchCard({ match, prediction, userId }: Props) {
           </div>
         )}
 
-        {/* Botón guardar */}
+        {/* Botones */}
         {!isLocked && !match.is_finished && (
-          <div className="mt-3">
-            {error && <p className="text-xs text-red-500 mb-1">{error}</p>}
-            <Button
-              size="sm"
-              className="w-full"
-              onClick={handleSave}
-              disabled={saving}
-              variant={saved ? 'secondary' : 'default'}
-            >
-              {saved ? '✓ Guardado' : saving ? 'Guardando...' : 'Guardar predicción'}
-            </Button>
+          <div className="mt-3 space-y-2">
+            {error && <p className="text-xs text-red-500">{error}</p>}
+
+            {showSaved ? (
+              /* ✅ Predicción guardada — muestra confirmación y botón de modificar */
+              <div className="flex gap-2">
+                <div className="flex-1 flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 rounded-md py-2">
+                  <span className="text-emerald-700 text-sm font-medium">✓ Predicción guardada</span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsEditing(true)}
+                  className="shrink-0 text-xs"
+                >
+                  Modificar
+                </Button>
+              </div>
+            ) : (
+              /* Modo edición — botones guardar y cancelar */
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? 'Guardando...' : 'Guardar predicción'}
+                </Button>
+                {hasSaved && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      // Restaurar valores originales y salir de edición
+                      setHome(prediction?.predicted_home?.toString() ?? '0')
+                      setAway(prediction?.predicted_away?.toString() ?? '0')
+                      setIsEditing(false)
+                    }}
+                    className="shrink-0 text-xs"
+                  >
+                    Cancelar
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </CardContent>

@@ -136,7 +136,7 @@ export default async function ResultadosPage() {
               {live.map(match => (
                 <div key={match.id} className="bg-white border border-red-200 rounded-xl px-4 py-3 shadow-sm">
                   <div className="text-xs text-slate-400 mb-2">
-                    {new Date(match.match_time).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })} · {match.group_name}
+                    {new Date(match.match_time).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Guatemala' })} · {match.group_name}
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 flex items-center justify-end gap-2">
@@ -183,7 +183,7 @@ export default async function ResultadosPage() {
                     {dayMatches.map(match => (
                       <div key={match.id} className="bg-white border rounded-xl px-4 py-3 shadow-sm">
                         <div className="text-xs text-slate-400 mb-2">
-                          {new Date(match.match_time).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })} · {match.group_name}
+                          {new Date(match.match_time).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Guatemala' })} · {match.group_name}
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 flex items-center justify-end gap-2">

@@ -67,22 +67,20 @@ export default function AdminMatchList({ matches }: Props) {
 
     const supabase = createClient()
 
-    // 1. Guardar resultado en matches
-    const { error: updateError } = await supabase
-      .from('matches')
-      .update({
-        home_score: homeScore,
-        away_score: awayScore,
-        is_finished: row.is_finished,
-      })
-      .eq('id', match.id)
+    // 1. Guardar resultado en matches via RPC (bypasea RLS)
+    const { error: updateError } = await supabase.rpc('save_match_result', {
+      p_match_id: match.id,
+      p_home_score: homeScore,
+      p_away_score: awayScore,
+      p_is_finished: row.is_finished,
+    })
 
     if (updateError) {
       setRows(prev => ({ ...prev, [match.id]: { ...prev[match.id], saving: false, error: 'Error al guardar.' } }))
       return
     }
 
-    // 2. Si está finalizado, recalcular puntos via RPC (SECURITY DEFINER bypasea RLS)
+    // 2. Si está finalizado, recalcular puntos via RPC
     if (row.is_finished) {
       const { error: rpcError } = await supabase.rpc('update_prediction_points', {
         p_match_id: match.id,

@@ -13,7 +13,6 @@ export default async function RankingTestPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Partidos finalizados con predicciones de todos los usuarios
   const { data: matches } = await supabase
     .from('matches')
     .select(`
@@ -47,16 +46,15 @@ export default async function RankingTestPage() {
             <span className="bg-slate-900 text-white text-xs font-bold px-2 py-0.5 rounded-full">Opción 1</span>
             <h2 className="font-semibold text-slate-700">Acordeón por partido</h2>
           </div>
-          <AuditAccordion matches={matches ?? []} />
+          <AuditAccordion matches={matches as any ?? []} />
         </section>
 
         <div className="border-t border-slate-200 pt-6">
-          {/* OPCIÓN 2 — Tabla */}
           <div className="flex items-center gap-2 mb-3">
             <span className="bg-slate-900 text-white text-xs font-bold px-2 py-0.5 rounded-full">Opción 2</span>
             <h2 className="font-semibold text-slate-700">Tabla por partido</h2>
           </div>
-          <AuditTable matches={matches ?? []} />
+          <AuditTable matches={matches as any ?? []} />
         </div>
       </main>
     </div>

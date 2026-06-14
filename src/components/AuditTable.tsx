@@ -1,3 +1,4 @@
+
 'use client'
 
 type Prediction = {
@@ -5,7 +6,7 @@ type Prediction = {
   predicted_away: number
   points: number | null
   is_auto: boolean
-  profiles: { display_name: string } | null
+  profiles: { display_name: string }[] | { display_name: string } | null
 }
 
 type Match = {
@@ -60,7 +61,7 @@ export default function AuditTable({ matches }: Props) {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {predictions.map((p, i) => {
-                    const name = p.profiles?.display_name ?? 'Sin nombre'
+                    const name = (Array.isArray(p.profiles) ? p.profiles[0]?.display_name : p.profiles?.display_name) ?? 'Sin nombre'
                     const ptColor =
                       p.points === 5 ? 'text-emerald-600 font-bold' :
                       p.points === 3 ? 'text-amber-600 font-bold' :

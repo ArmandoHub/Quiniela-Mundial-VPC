@@ -7,7 +7,7 @@ type Prediction = {
   predicted_away: number
   points: number | null
   is_auto: boolean
-  profiles: { display_name: string } | null
+  profiles: { display_name: string }[] | { display_name: string } | null
 }
 
 type Match = {
@@ -70,7 +70,7 @@ export default function AuditAccordion({ matches }: Props) {
             {isOpen && (
               <div className="border-t divide-y">
                 {predictions.map((p, i) => {
-                  const name = p.profiles?.display_name ?? 'Sin nombre'
+                  const name = (Array.isArray(p.profiles) ? p.profiles[0]?.display_name : p.profiles?.display_name) ?? 'Sin nombre'
                   const ptColor =
                     p.points === 5 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
                     p.points === 3 ? 'bg-amber-100 text-amber-700 border-amber-200' :

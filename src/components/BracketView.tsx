@@ -230,18 +230,32 @@ function MiniEmptySlot() {
   )
 }
 
-function MiniColumn({ matches, emptyCount }: { matches: Match[]; emptyCount: number }) {
+function MiniColumn({ matches, emptyCount, totalSlots }: { matches: Match[]; emptyCount: number; totalSlots: number }) {
+  // Altura fija por slot de 16vos (la ronda con más partidos), las demás rondas
+  // usan el mismo alto total pero con menos elementos, generando el efecto embudo
+  const SLOT_HEIGHT = 92 // alto aprox de cada MiniMatchCard
+  const totalHeight = totalSlots * SLOT_HEIGHT + (totalSlots - 1) * 20 // + gaps
+
   return (
-    <div className="flex flex-col justify-around gap-5 shrink-0">
+    <div
+      className="flex flex-col justify-around shrink-0"
+      style={{ height: `${totalHeight}px` }}
+    >
       {matches.map(m => <MiniMatchCard key={m.id} match={m} />)}
       {Array.from({ length: emptyCount }).map((_, i) => <MiniEmptySlot key={i} />)}
     </div>
   )
 }
 
-function Connector({ count }: { count: number }) {
+function Connector({ count, totalSlots }: { count: number; totalSlots: number }) {
+  const SLOT_HEIGHT = 92
+  const totalHeight = totalSlots * SLOT_HEIGHT + (totalSlots - 1) * 20
+
   return (
-    <div className="flex flex-col justify-around shrink-0" style={{ width: '18px' }}>
+    <div
+      className="flex flex-col justify-around shrink-0"
+      style={{ width: '18px', height: `${totalHeight}px` }}
+    >
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="flex-1 flex items-center justify-center">
           <div className="w-full h-px bg-slate-300" />
@@ -259,6 +273,9 @@ function FullBracketModal({
   onClose: () => void
 }) {
   const get = (key: string) => roundsWithMatches.find(r => r.key === key)!
+  // Altura total basada en 16vos (la ronda con más partidos) — todas las columnas
+  // comparten esta misma altura, generando el efecto embudo hacia la final
+  const TOTAL_SLOTS = 16
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 flex flex-col">
@@ -279,20 +296,18 @@ function FullBracketModal({
         className="flex-1 overflow-auto bg-slate-50"
         style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
       >
-        <div className="flex gap-1 items-stretch p-5" style={{ minWidth: '1300px', minHeight: '100%' }}>
-          <MiniColumn matches={get('R16').matches} emptyCount={Math.max(0, 16 - get('R16').matches.length)} />
-          <Connector count={8} />
-          <MiniColumn matches={get('R8').matches} emptyCount={Math.max(0, 8 - get('R8').matches.length)} />
-          <Connector count={4} />
-          <MiniColumn matches={get('QF').matches} emptyCount={Math.max(0, 4 - get('QF').matches.length)} />
-          <Connector count={2} />
-          <MiniColumn matches={get('SF').matches} emptyCount={Math.max(0, 2 - get('SF').matches.length)} />
-          <Connector count={1} />
-          <div className="flex flex-col gap-4 shrink-0 justify-center">
-            <div>
-              <span className="text-[9px] text-amber-600 uppercase tracking-wide block text-center mb-1">🏆 Final</span>
-              {get('F').matches.length > 0 ? <MiniMatchCard match={get('F').matches[0]} /> : <MiniEmptySlot />}
-            </div>
+        <div className="flex gap-1 items-center p-5" style={{ minWidth: '1300px', minHeight: '100%' }}>
+          <MiniColumn matches={get('R16').matches} emptyCount={Math.max(0, 16 - get('R16').matches.length)} totalSlots={TOTAL_SLOTS} />
+          <Connector count={8} totalSlots={TOTAL_SLOTS} />
+          <MiniColumn matches={get('R8').matches} emptyCount={Math.max(0, 8 - get('R8').matches.length)} totalSlots={TOTAL_SLOTS} />
+          <Connector count={4} totalSlots={TOTAL_SLOTS} />
+          <MiniColumn matches={get('QF').matches} emptyCount={Math.max(0, 4 - get('QF').matches.length)} totalSlots={TOTAL_SLOTS} />
+          <Connector count={2} totalSlots={TOTAL_SLOTS} />
+          <MiniColumn matches={get('SF').matches} emptyCount={Math.max(0, 2 - get('SF').matches.length)} totalSlots={TOTAL_SLOTS} />
+          <Connector count={1} totalSlots={TOTAL_SLOTS} />
+          <div className="flex flex-col justify-center shrink-0" style={{ height: `${TOTAL_SLOTS * 92 + (TOTAL_SLOTS - 1) * 20}px` }}>
+            <span className="text-[9px] text-amber-600 uppercase tracking-wide block text-center mb-1">🏆 Final</span>
+            {get('F').matches.length > 0 ? <MiniMatchCard match={get('F').matches[0]} /> : <MiniEmptySlot />}
           </div>
         </div>
       </div>

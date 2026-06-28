@@ -68,18 +68,11 @@ export default function NavMenu() {
               Ranking
             </Link>
 <Link
-  href="/rankingTest"
+  href="/eliminatoria"
   onClick={() => setOpen(false)}
   className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
 >
-  Historial de Resultados
-</Link>
-<Link
-  href="/resultados"
-  onClick={() => setOpen(false)}
-  className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
->
-  Resultados
+  Eliminatoria
 </Link>
             <Link
               href="/terceros"

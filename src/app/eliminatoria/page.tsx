@@ -29,10 +29,10 @@ export default async function EliminatoriaPage() {
   }, {} as Record<string, any>)
 
   return (
-    <div className="min-h-screen bg-[#0B1120]">
-      <nav className="bg-[#0F172A] border-b border-slate-800 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <span className="font-bold text-lg text-white">Quiniela VPC</span>
+    <div className="min-h-screen bg-slate-50">
+      <nav className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex justify-between items-center">
+          <span className="font-bold text-lg">Quiniela VPC</span>
           <NavMenu />
         </div>
       </nav>

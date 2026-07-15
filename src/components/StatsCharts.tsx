@@ -50,9 +50,26 @@ export default function StatsCharts({ matches, predictions, users }: Props) {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const [selectedUsers, setSelectedUsers] = useState<string[]>(
-    users.slice(0, 3).map(u => u.id) // arrancamos con menos usuarios para que se lea bien en celular
-  )
+  // Puntos totales por usuario (para poder ofrecer "Top 5" como atajo)
+  const totalPointsByUser = useMemo(() => {
+    const totals: Record<string, number> = {}
+    users.forEach(u => { totals[u.id] = 0 })
+    predictions.forEach(p => {
+      if (totals[p.user_id] !== undefined) totals[p.user_id] += p.points ?? 0
+    })
+    return totals
+  }, [predictions, users])
+
+  const topUserIds = useMemo(() => {
+    return [...users]
+      .sort((a, b) => (totalPointsByUser[b.id] ?? 0) - (totalPointsByUser[a.id] ?? 0))
+      .slice(0, 5)
+      .map(u => u.id)
+  }, [users, totalPointsByUser])
+
+  const [selectedUsers, setSelectedUsers] = useState<string[]>(topUserIds.slice(0, 3))
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [search, setSearch] = useState('')
 
   const userColor = useMemo(() => {
     const map: Record<string, string> = {}
@@ -60,11 +77,21 @@ export default function StatsCharts({ matches, predictions, users }: Props) {
     return map
   }, [users])
 
-  function toggleUser(uid: string) {
-    setSelectedUsers(prev =>
-      prev.includes(uid) ? prev.filter(u => u !== uid) : [...prev, uid]
-    )
+  function addUser(uid: string) {
+    setSelectedUsers(prev => (prev.includes(uid) ? prev : [...prev, uid]))
+    setSearch('')
   }
+
+  function removeUser(uid: string) {
+    setSelectedUsers(prev => prev.filter(u => u !== uid))
+  }
+
+  const availableUsers = useMemo(() => {
+    return users
+      .filter(u => !selectedUsers.includes(u.id))
+      .filter(u => u.display_name.toLowerCase().includes(search.toLowerCase()))
+      .sort((a, b) => a.display_name.localeCompare(b.display_name))
+  }, [users, selectedUsers, search])
 
   const progressionData = useMemo(() => {
     const running: Record<string, number> = {}
@@ -124,92 +151,155 @@ export default function StatsCharts({ matches, predictions, users }: Props) {
     return result
   }, [matches, predictions, users])
 
-  // En el eje X del gráfico de línea, con muchos partidos el móvil se satura de labels.
-  // Mostramos menos ticks en pantallas chicas.
   const xTickInterval = isMobile ? Math.ceil(matches.length / 6) : Math.ceil(matches.length / 12)
-
-  // El gráfico de línea necesita ancho mínimo proporcional a la cantidad de partidos
-  // para no aplastarse; en móvil se scrollea horizontalmente en vez de comprimirse.
   const lineChartMinWidth = Math.max(matches.length * (isMobile ? 14 : 8), 320)
-
-  // El gráfico de barras crece verticalmente según la cantidad de usuarios.
   const barChartHeight = Math.max(users.length * (isMobile ? 34 : 28), 200)
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Selector de usuarios */}
-      <div>
+      {/* Selector de usuarios: buscador + chips solo de seleccionados */}
+      <div className="bg-white rounded-xl border shadow-sm p-3 sm:p-4">
         <p className="text-xs font-medium text-slate-500 mb-2">
-          Usuarios en el gráfico de tendencia (toca para agregar/quitar)
+          Usuarios en el gráfico de tendencia
         </p>
-        <div className="flex flex-wrap gap-1.5 sm:gap-2">
-          {users.map(u => {
-            const active = selectedUsers.includes(u.id)
+
+        {/* Chips de usuarios seleccionados */}
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
+          {selectedUsers.length === 0 && (
+            <p className="text-xs text-slate-400 italic">Ningún usuario seleccionado.</p>
+          )}
+          {selectedUsers.map(uid => {
+            const u = users.find(x => x.id === uid)
+            if (!u) return null
             return (
-              <button
-                key={u.id}
-                onClick={() => toggleUser(u.id)}
-                className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold border transition ${
-                  active
-                    ? 'text-white shadow-sm'
-                    : 'bg-white text-slate-400 border-slate-200'
-                }`}
-                style={active ? { backgroundColor: userColor[u.id], borderColor: userColor[u.id] } : {}}
+              <span
+                key={uid}
+                className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold text-white shadow-sm"
+                style={{ backgroundColor: userColor[uid] }}
               >
                 {u.display_name}
-              </button>
+                <button
+                  onClick={() => removeUser(uid)}
+                  className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30"
+                  aria-label={`Quitar ${u.display_name}`}
+                >
+                  ×
+                </button>
+              </span>
             )
           })}
         </div>
+
+        {/* Atajos rápidos */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          <button
+            onClick={() => setSelectedUsers(topUserIds)}
+            className="text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-full transition"
+          >
+            🏆 Top 5
+          </button>
+          {selectedUsers.length > 0 && (
+            <button
+              onClick={() => setSelectedUsers([])}
+              className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 px-2.5 py-1 rounded-full transition"
+            >
+              Limpiar todo
+            </button>
+          )}
+          <button
+            onClick={() => setPickerOpen(o => !o)}
+            className="ml-auto text-[11px] font-semibold text-white bg-slate-900 hover:bg-slate-800 px-3 py-1 rounded-full transition"
+          >
+            {pickerOpen ? 'Cerrar ✕' : '+ Agregar usuario'}
+          </button>
+        </div>
+
+        {/* Panel de búsqueda para agregar usuarios */}
+        {pickerOpen && (
+          <div className="border-t pt-3">
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar por nombre..."
+              autoFocus
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-slate-900"
+            />
+            <div className="max-h-56 overflow-y-auto space-y-1">
+              {availableUsers.length === 0 && (
+                <p className="text-xs text-slate-400 text-center py-3">Sin resultados.</p>
+              )}
+              {availableUsers.map(u => (
+                <button
+                  key={u.id}
+                  onClick={() => addUser(u.id)}
+                  className="w-full flex items-center gap-2 text-left px-2 py-2 rounded-lg hover:bg-slate-50 text-sm text-slate-700"
+                >
+                  <span className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 shrink-0">
+                    {getInitials(u.display_name)}
+                  </span>
+                  {u.display_name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {selectedUsers.length > 5 && (
-          <p className="text-[11px] text-amber-600 mt-1.5">
-            Con muchos usuarios seleccionados el gráfico se satura — considera dejar 3-4 a la vez.
+          <p className="text-[11px] text-amber-600 mt-2">
+            Con muchos usuarios seleccionados el gráfico se satura — considera dejar 3-5 a la vez.
           </p>
         )}
       </div>
 
-      {/* Gráfico de línea: progresión acumulada, con scroll horizontal en móvil */}
+      {/* Gráfico de línea: progresión acumulada */}
       <div className="bg-white rounded-xl border shadow-sm p-3 sm:p-4">
         <h2 className="text-sm font-bold text-slate-900 mb-1">Progresión acumulada de puntos</h2>
         <p className="text-xs text-slate-400 mb-3 sm:mb-4">
           Eje X = orden cronológico de partidos · desliza para ver más
         </p>
-        <div className="overflow-x-auto">
-          <div style={{ minWidth: lineChartMinWidth }} className="h-64 sm:h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={progressionData} margin={{ top: 5, right: 12, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis
-                  dataKey="idx"
-                  tick={{ fontSize: 10 }}
-                  interval={xTickInterval}
-                  label={{ value: 'Partido #', position: 'insideBottom', offset: -3, fontSize: 10 }}
-                />
-                <YAxis tick={{ fontSize: 10 }} width={30} />
-                <Tooltip
-                  labelFormatter={(idx) => `Partido #${idx}`}
-                  contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                {selectedUsers.map(uid => {
-                  const u = users.find(x => x.id === uid)
-                  if (!u) return null
-                  return (
-                    <Line
-                      key={uid}
-                      type="monotone"
-                      dataKey={uid}
-                      name={u.display_name}
-                      stroke={userColor[uid]}
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  )
-                })}
-              </LineChart>
-            </ResponsiveContainer>
+        {selectedUsers.length === 0 ? (
+          <p className="text-xs text-slate-400 text-center py-12">
+            Agrega al menos un usuario para ver la tendencia.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <div style={{ minWidth: lineChartMinWidth }} className="h-64 sm:h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={progressionData} margin={{ top: 5, right: 12, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis
+                    dataKey="idx"
+                    tick={{ fontSize: 10 }}
+                    interval={xTickInterval}
+                    label={{ value: 'Partido #', position: 'insideBottom', offset: -3, fontSize: 10 }}
+                  />
+                  <YAxis tick={{ fontSize: 10 }} width={30} />
+                  <Tooltip
+                    labelFormatter={(idx) => `Partido #${idx}`}
+                    contentStyle={{ fontSize: 12, borderRadius: 8 }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  {selectedUsers.map(uid => {
+                    const u = users.find(x => x.id === uid)
+                    if (!u) return null
+                    return (
+                      <Line
+                        key={uid}
+                        type="monotone"
+                        dataKey={uid}
+                        name={u.display_name}
+                        stroke={userColor[uid]}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    )
+                  })}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Gráfico de barras: precisión */}

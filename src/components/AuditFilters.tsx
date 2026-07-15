@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import AuditMatrix from './AuditMatrix'
 
 const KNOCKOUT_STAGES = ['R16', 'R8', 'QF', 'SF', 'FINAL']
@@ -100,11 +101,20 @@ export default function AuditFilters({ matches, users }: Props) {
         </div>
       </div>
 
-      <p className="text-xs text-slate-400">
-        Mostrando {filteredMatches.length} de {matches.length} partidos
-        {userFilter !== 'ALL' &&
-          ` · Usuario: ${users.find(u => u.id === userFilter)?.display_name}`}
-      </p>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <p className="text-xs text-slate-400">
+          Mostrando {filteredMatches.length} de {matches.length} partidos
+          {userFilter !== 'ALL' &&
+            ` · Usuario: ${users.find(u => u.id === userFilter)?.display_name}`}
+        </p>
+
+        <Link
+          href="/estadisticas"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 transition"
+        >
+          📊 Ver estadísticas
+        </Link>
+      </div>
 
       <AuditMatrix matches={filteredMatches} />
     </div>

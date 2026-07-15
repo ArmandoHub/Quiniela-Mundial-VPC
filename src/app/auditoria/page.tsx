@@ -6,11 +6,43 @@ import AuditFilters from '@/components/AuditFilters'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+// Trae TODAS las filas de una tabla paginando de 1000 en 1000,
+// porque PostgREST/Supabase limita cada respuesta a 1000 registros por defecto.
+async function fetchAllPredictions(supabase: any, matchIds: string[]) {
+  if (matchIds.length === 0) return []
+
+  const pageSize = 1000
+  let allData: any[] = []
+  let from = 0
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('predictions')
+      .select('match_id, predicted_home, predicted_away, points, is_auto, user_id')
+      .in('match_id', matchIds)
+      .range(from, from + pageSize - 1)
+
+    if (error) {
+      console.error('Error trayendo predictions:', error)
+      break
+    }
+    if (!data || data.length === 0) break
+
+    allData = allData.concat(data)
+
+    if (data.length < pageSize) break // última página, ya no hay más
+    from += pageSize
+  }
+
+  return allData
+}
+
 export default async function AuditoriaPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  // Query 1: partidos finalizados
   const { data: matches } = await supabase
     .from('matches')
     .select('id, home_team, away_team, match_time, home_score, away_score, group_name')
@@ -19,11 +51,10 @@ export default async function AuditoriaPage() {
 
   const matchIds = (matches ?? []).map(m => m.id)
 
-  const { data: predictions } = await supabase
-    .from('predictions')
-    .select('match_id, predicted_home, predicted_away, points, is_auto, user_id')
-    .in('match_id', matchIds.length > 0 ? matchIds : ['none'])
+  // Query 2: predicciones (paginada, trae TODOS los registros sin importar el total)
+  const predictions = await fetchAllPredictions(supabase, matchIds)
 
+  // Query 3: perfiles
   const { data: profiles } = await supabase
     .from('profiles')
     .select('id, display_name')
@@ -36,16 +67,16 @@ export default async function AuditoriaPage() {
 
   const matchesWithPredictions = (matches ?? []).map(m => ({
     ...m,
-    predictions: (predictions ?? [])
-      .filter(p => p.match_id === m.id)
-      .map(p => ({
+    predictions: predictions
+      .filter((p: any) => p.match_id === m.id)
+      .map((p: any) => ({
         ...p,
         profiles: { display_name: profileMap[p.user_id] ?? 'Sin nombre' },
       })),
   }))
 
   // Solo usuarios con al menos una predicción (evita alias vacíos en el dropdown)
-  const activeUserIds = new Set((predictions ?? []).map(p => p.user_id))
+  const activeUserIds = new Set(predictions.map((p: any) => p.user_id))
   const users = (profiles ?? [])
     .filter(p => activeUserIds.has(p.id))
     .map(p => ({ id: p.id, display_name: p.display_name }))
